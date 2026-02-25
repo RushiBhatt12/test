@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Find Sellers — BizBoost</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #000; --surface: #0d0d0d; --s2: #111; --s3: #1c1c1e;
+      --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.05);
+      --text: #f5f5f7; --muted: rgba(245,245,247,0.5); --muted2: rgba(245,245,247,0.28);
+      --blue: #2997ff; --blue-d: #147ce5;
+      --green: #30d158; --orange: #ff9f0a; --red: #ff453a; --purple: #bf5af2;
+      --nav-h: 48px;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+      background: var(--bg); color: var(--text);
+      -webkit-font-smoothing: antialiased; overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* ── CURSOR ──────────────────────────────────────────────── */
+    #cursor { position:fixed; width:8px; height:8px; background:#fff; border-radius:50%; pointer-events:none; z-index:9999; transform:translate(-50%,-50%); mix-blend-mode:difference; transition:opacity .15s; }
+    #cursor-ring { position:fixed; width:36px; height:36px; border:1px solid rgba(255,255,255,0.35); border-radius:50%; pointer-events:none; z-index:9998; transform:translate(-50%,-50%); transition:width .3s,height .3s,border-color .3s; }
+    #cursor-ring.hover { width:52px; height:52px; border-color:rgba(41,151,255,0.6); }
+    @media(max-width:768px){ #cursor,#cursor-ring{display:none} body{cursor:auto} }
+
+    /* ── SCROLL PROGRESS ─────────────────────────────────────── */
+    #prog { position:fixed; top:0; left:0; height:2px; width:0; background:linear-gradient(90deg,var(--blue),var(--purple)); z-index:9999; transition:width .08s; }
+
+    /* ── NAV ─────────────────────────────────────────────────── */
+    nav {
+      position: fixed; top:0; left:0; right:0; z-index:500;
+      height: var(--nav-h);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 24px;
+      background: rgba(0,0,0,0.72);
+      backdrop-filter: saturate(200%) blur(24px);
+      -webkit-backdrop-filter: saturate(200%) blur(24px);
+      border-bottom: 1px solid var(--border);
+      transition: background .3s;
+    }
+    nav.scrolled { background: rgba(0,0,0,0.92); }
+    .logo { font-size:17px; font-weight:700; color:var(--text); text-decoration:none; letter-spacing:-.04em; }
+    .logo em { color:var(--blue); font-style:normal; }
+    .nav-right { display:flex; align-items:center; gap:10px; }
+    .user-pill {
+      display:flex; align-items:center; gap:8px;
+      background:rgba(255,255,255,0.06); border:1px solid var(--border);
+      border-radius:980px; padding:4px 14px 4px 6px; font-size:13px;
+    }
+    .user-av {
+      width:26px; height:26px; border-radius:50%;
+      background:linear-gradient(135deg,var(--blue),var(--purple));
+      display:flex; align-items:center; justify-content:center;
+      font-size:11px; font-weight:700; flex-shrink:0;
+    }
+    .nav-btn {
+      font-size:12px; font-weight:600; padding:6px 14px; border-radius:980px; cursor:none;
+      transition:all .18s; font-family:inherit; border:none;
+    }
+    .edit-btn  { background:rgba(41,151,255,0.10); border:1px solid rgba(41,151,255,0.2); color:var(--blue); }
+    .edit-btn:hover { background:rgba(41,151,255,0.2); }
+    .logout-btn { background:rgba(255,69,58,0.10); border:1px solid rgba(255,69,58,0.18); color:var(--red); }
+    .logout-btn:hover { background:rgba(255,69,58,0.2); }
+
+    /* ── HERO ────────────────────────────────────────────────── */
+    .hero {
+      padding: calc(var(--nav-h) + 40px) 20px 0;
+      position:relative; overflow:hidden;
+    }
+    .hero-bg {
+      position:absolute; inset:0; pointer-events:none;
+      background:radial-gradient(ellipse 70% 50% at 50% 0%, rgba(41,151,255,0.14),transparent 60%),
+                 radial-gradient(ellipse 40% 40% at 80% 20%, rgba(191,90,242,0.07),transparent);
+      animation: bgpulse 8s ease-in-out infinite alternate;
+    }
+    @keyframes bgpulse { 0%{opacity:.8} 100%{opacity:1} }
+    .hero-grid {
+      position:absolute; inset:0; pointer-events:none;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.018) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(255,255,255,0.018) 1px,transparent 1px);
+      background-size:60px 60px;
+      mask-image:radial-gradient(ellipse 85% 55% at 50% 0%,black,transparent);
+      -webkit-mask-image:radial-gradient(ellipse 85% 55% at 50% 0%,black,transparent);
+    }
+    .hero-text { position:relative; z-index:2; text-align:center; padding:0 0 28px; }
+    .hero-text h1 {
+      font-size:clamp(26px,4.5vw,46px); font-weight:700; letter-spacing:-.04em; margin-bottom:8px;
+      background:linear-gradient(160deg,#fff 50%,rgba(255,255,255,0.5) 100%);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+      animation: fadeUp .7s ease both;
+    }
+    .hero-text p { font-size:14px; color:var(--muted); animation: fadeUp .7s .1s ease both; }
+    .powered-tag {
+      display:inline-flex; align-items:center; gap:6px;
+      font-size:11px; color:var(--muted2); margin-top:10px;
+      animation: fadeUp .7s .2s ease both;
+    }
+    .powered-tag strong {
+      background:linear-gradient(130deg,var(--blue),var(--purple));
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+      font-weight:700;
+    }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+    /* ── SEARCH CARD ─────────────────────────────────────────── */
+    .search-card {
+      position:relative; z-index:2;
+      background:rgba(255,255,255,0.028);
+      border:1px solid rgba(255,255,255,0.09);
+      border-radius:22px; padding:28px;
+      max-width:960px; margin:0 auto;
+      backdrop-filter:blur(16px);
+      box-shadow:0 50px 100px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.06);
+      animation: fadeUp .7s .15s ease both;
+    }
+    .search-card::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:1px;
+      background:linear-gradient(90deg,transparent 5%,rgba(41,151,255,0.35) 50%,transparent 95%);
+      border-radius:22px 22px 0 0;
+    }
+
+    .card-label {
+      font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+      color:var(--muted2); margin-bottom:18px; display:flex; align-items:center; gap:8px;
+    }
+
+    /* FORM ROWS */
+    .row1 { display:grid; grid-template-columns:2.5fr 1fr 1fr 1.2fr auto; gap:10px; align-items:end; margin-bottom:10px; }
+    .row2 { display:grid; grid-template-columns:1fr 1fr 1fr auto; gap:10px; align-items:end; }
+    .fg label { display:block; font-size:11px; font-weight:500; color:var(--muted); margin-bottom:6px; letter-spacing:.03em; text-transform:uppercase; }
+    .fg input, .fg select {
+      width:100%; padding:11px 14px;
+      background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.09);
+      border-radius:11px; color:var(--text); font-size:14px; outline:none;
+      transition:all .2s; font-family:inherit;
+    }
+    .fg input::placeholder { color:var(--muted2); }
+    .fg input:focus, .fg select:focus {
+      border-color:rgba(41,151,255,0.5);
+      box-shadow:0 0 0 3px rgba(41,151,255,0.09);
+      background:rgba(255,255,255,0.09);
+    }
+    .fg select option { background:#1c1c1e; }
+    .qty-wrap { display:flex; gap:6px; }
+    .qty-wrap input  { flex:1; min-width:0; }
+    .qty-wrap select { width:74px; padding:11px 8px; }
+
+    /* SEARCH BUTTON */
+    .search-btn {
+      padding:11px 24px; border-radius:11px; align-self:end;
+      background:var(--blue); color:#fff; border:none;
+      font-size:14px; font-weight:600; cursor:none; white-space:nowrap;
+      font-family:inherit; transition:all .25s; position:relative; overflow:hidden;
+    }
+    .search-btn::after {
+      content:''; position:absolute; inset:0;
+      background:linear-gradient(rgba(255,255,255,0.12),transparent); border-radius:inherit;
+    }
+    .search-btn:hover { background:var(--blue-d); box-shadow:0 8px 28px rgba(41,151,255,0.4); transform:scale(1.02); }
+    .search-btn:active { transform:scale(.97); }
+    .search-btn:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+
+    /* LEAD PILL */
+    .lead-pill {
+      display:inline-flex; align-items:center; gap:5px;
+      background:rgba(48,209,88,0.1); border:1px solid rgba(48,209,88,0.2);
+      color:var(--green); font-size:11px; font-weight:600;
+      padding:5px 12px; border-radius:980px;
+      animation:popIn .3s cubic-bezier(.34,1.56,.64,1) both;
+    }
+    @keyframes popIn { from{opacity:0;transform:scale(0.8)} to{opacity:1;transform:scale(1)} }
+
+    /* ── PLATFORM PILLS ──────────────────────────────────────── */
+    .pills-wrap { display:none; }
+    .pills-row  { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px; }
+    .pill {
+      padding:5px 14px; border-radius:980px; font-size:12px; font-weight:500;
+      border:1px solid var(--border); background:rgba(255,255,255,0.04);
+      color:var(--muted); cursor:none; transition:all .18s; user-select:none;
+    }
+    .pill:hover { border-color:var(--blue); color:var(--blue); }
+    .pill.on { background:var(--blue); color:#fff; border-color:var(--blue); }
+
+    /* ── RESULTS AREA ────────────────────────────────────────── */
+    .results-area { max-width:960px; margin:28px auto 0; padding:0 20px 100px; }
+
+    /* STATS BAR */
+    .stats-bar {
+      display:flex; flex-wrap:wrap; gap:12px; align-items:center;
+      background:rgba(255,255,255,0.03); border:1px solid var(--border);
+      border-radius:14px; padding:14px 20px; margin-bottom:18px;
+      animation:slideIn .4s cubic-bezier(.22,1,.36,1) both;
+    }
+    @keyframes slideIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+    .stat-total { font-size:14px; font-weight:700; }
+    .stat-item  { font-size:13px; display:flex; align-items:center; gap:4px; }
+    .stat-phone { color:var(--green); font-weight:600; }
+    .stat-maps  { color:var(--muted); }
+    .stat-lead  { color:var(--blue); font-weight:600; margin-left:auto; }
+
+    /* SECTION LABEL */
+    .sec-lbl {
+      font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+      color:var(--muted); margin:28px 0 12px;
+      padding-bottom:8px; border-bottom:1px solid var(--border2);
+      display:flex; align-items:center; gap:8px;
+    }
+    .sec-lbl span { font-weight:400; color:var(--muted2); }
+
+    /* SELLER CARD */
+    .s-card {
+      display:flex; justify-content:space-between; align-items:center;
+      gap:16px; flex-wrap:wrap;
+      background:rgba(255,255,255,0.03); border:1px solid var(--border);
+      border-radius:16px; padding:18px 22px; margin-bottom:10px;
+      transition:all .25s; position:relative; overflow:hidden;
+      animation:cardIn .4s cubic-bezier(.22,1,.36,1) both;
+      cursor:none;
+    }
+    .s-card::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:1px;
+      background:linear-gradient(90deg,transparent,rgba(255,255,255,0.07),transparent);
+    }
+    @keyframes cardIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+    .s-card:hover { border-color:rgba(255,255,255,0.15); box-shadow:0 12px 48px rgba(0,0,0,0.45); transform:translateY(-2px); background:rgba(255,255,255,0.05); }
+    .s-card.verified { border-left:2px solid var(--blue); }
+    .s-card.has-phone { border-left:2px solid var(--green); }
+    .s-card.is-featured {
+      border:1px solid rgba(245,158,11,0.35);
+      background:rgba(245,158,11,0.04);
+      box-shadow:0 0 0 1px rgba(245,158,11,0.12), 0 8px 32px rgba(0,0,0,0.4);
+    }
+    .s-card.is-featured::before {
+      background:linear-gradient(90deg,transparent,rgba(245,158,11,0.18),transparent);
+    }
+    .s-card.is-featured:hover { border-color:rgba(245,158,11,0.55); }
+    .badge-featured {
+      display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:700;
+      padding:2px 9px;border-radius:980px;white-space:nowrap;
+      background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.35);color:#f59e0b;
+    }
+    .badge-verified-bb {
+      display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:700;
+      padding:2px 9px;border-radius:980px;white-space:nowrap;
+      background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.3);color:#22c55e;
+    }
+    .featured-crown {
+      position:absolute;top:10px;right:14px;font-size:11px;font-weight:700;
+      color:#f59e0b;letter-spacing:.04em;opacity:0.7;
+    }
+    .s-card.is-featured {
+      border:1px solid rgba(245,158,11,0.35);
+      background:rgba(245,158,11,0.04);
+      box-shadow:0 0 0 1px rgba(245,158,11,0.12), 0 8px 32px rgba(0,0,0,0.4);
+    }
+    .s-card.is-featured::before {
+      background:linear-gradient(90deg,transparent,rgba(245,158,11,0.18),transparent);
+    }
+    .s-card.is-featured:hover { border-color:rgba(245,158,11,0.55); }
+    .badge-featured {
+      display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:700;
+      padding:2px 9px;border-radius:980px;white-space:nowrap;
+      background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.35);color:#f59e0b;
+    }
+    .badge-verified-bb {
+      display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:700;
+      padding:2px 9px;border-radius:980px;white-space:nowrap;
+      background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.3);color:#22c55e;
+    }
+    .featured-crown {
+      position:absolute;top:10px;right:14px;font-size:11px;font-weight:700;
+      color:#f59e0b;letter-spacing:.04em;opacity:0.7;
+    }
+
+    .s-info { flex:1; min-width:0; }
+    .s-name { font-size:15px; font-weight:600; margin-bottom:5px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; letter-spacing:-.01em; }
+    .s-sub  { font-size:13px; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:460px; }
+    .s-meta { margin-top:8px; display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+
+    .s-actions { display:flex; flex-direction:column; align-items:flex-end; gap:8px; flex-shrink:0; }
+
+    /* BADGES */
+    .badge { font-size:11px; font-weight:600; padding:3px 9px; border-radius:980px; white-space:nowrap; }
+    .b-biz       { background:rgba(41,151,255,0.14); color:var(--blue); }
+    .b-maps      { background:rgba(48,209,88,0.12); color:#34c759; }
+    .b-justdial  { background:rgba(255,159,10,0.12); color:var(--orange); }
+    .b-indiamart { background:rgba(191,90,242,0.12); color:var(--purple); }
+    .b-tradeindia{ background:rgba(41,151,255,0.12); color:#5ac8fa; }
+    .b-sulekha   { background:rgba(255,69,58,0.12); color:var(--red); }
+    .b-udaan     { background:rgba(48,209,88,0.12); color:var(--green); }
+    .b-exporters { background:rgba(255,159,10,0.12); color:var(--orange); }
+    .b-yellow    { background:rgba(255,214,10,0.12); color:#ffd60a; }
+    .b-web       { background:rgba(255,255,255,0.08); color:var(--muted); }
+    .b-trust-hi  { background:rgba(48,209,88,0.10); color:var(--green); }
+    .b-trust-med { background:rgba(255,159,10,0.10); color:var(--orange); }
+
+    /* ACTION BUTTONS */
+    .a-call {
+      display:inline-flex; align-items:center; gap:6px;
+      padding:9px 18px; border-radius:10px;
+      background:var(--green); color:#fff; font-size:13px; font-weight:600;
+      text-decoration:none; transition:all .2s; white-space:nowrap;
+    }
+    .a-call:hover { background:#25a244; transform:scale(1.03); box-shadow:0 6px 22px rgba(48,209,88,0.3); }
+    .a-send {
+      display:inline-flex; align-items:center; gap:5px;
+      padding:7px 15px; border-radius:10px;
+      background:rgba(41,151,255,0.10); border:1px solid rgba(41,151,255,0.2);
+      color:var(--blue); font-size:12px; font-weight:500;
+      cursor:none; transition:all .18s; font-family:inherit; white-space:nowrap;
+    }
+    .a-send:hover { background:rgba(41,151,255,0.2); }
+    .a-view {
+      display:inline-flex; align-items:center; gap:4px;
+      padding:6px 12px; border-radius:8px;
+      background:rgba(255,255,255,0.06); border:1px solid var(--border);
+      color:var(--muted); font-size:11px; text-decoration:none; transition:all .18s; white-space:nowrap;
+    }
+    .a-view:hover { background:rgba(255,255,255,0.1); color:var(--text); }
+    .rating { font-size:12px; color:var(--orange); font-weight:600; }
+    .rating span { color:var(--muted); font-weight:400; margin-left:3px; font-size:11px; }
+    .web-link { font-size:12px; color:var(--blue); text-decoration:none; transition:color .15s; }
+    .web-link:hover { color:#5ac8fa; }
+
+    /* LOADER */
+    .loader { display:flex; flex-direction:column; align-items:center; padding:80px 0; text-align:center; }
+    .spin-ring {
+      width:48px; height:48px; border:2px solid rgba(255,255,255,0.07);
+      border-top-color:var(--blue); border-radius:50%;
+      animation:spin .8s linear infinite; margin-bottom:22px;
+    }
+    @keyframes spin { to{transform:rotate(360deg)} }
+    .loader-main { font-size:16px; font-weight:600; margin-bottom:6px; letter-spacing:-.01em; }
+    .loader-sub  { font-size:13px; color:var(--muted); min-height:20px; transition:opacity .3s; }
+    .search-steps { display:flex; gap:6px; margin-top:24px; flex-wrap:wrap; justify-content:center; }
+    .search-step {
+      display:flex; align-items:center; gap:5px; font-size:11px; color:var(--muted2);
+      padding:4px 10px; border-radius:980px; border:1px solid var(--border2); transition:all .3s;
+    }
+    .search-step.active { color:var(--blue); border-color:rgba(41,151,255,0.3); background:rgba(41,151,255,0.07); }
+    .search-step.done   { color:var(--green); border-color:rgba(48,209,88,0.25); background:rgba(48,209,88,0.07); }
+    .step-dot { width:5px; height:5px; border-radius:50%; background:currentColor; }
+
+    /* EMPTY & INIT STATES */
+    .empty, .init-state {
+      background:rgba(255,255,255,0.02); border:1px solid var(--border);
+      border-radius:20px; padding:72px 24px; text-align:center;
+    }
+    .empty-icon,.init-icon { font-size:56px; margin-bottom:18px; animation:floatIcon 3s ease-in-out infinite; }
+    @keyframes floatIcon { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+    .empty h3,.init-title { font-size:18px; font-weight:700; margin-bottom:8px; letter-spacing:-.02em; }
+    .empty p,.init-sub { font-size:14px; color:var(--muted); line-height:1.6; }
+
+    /* MODAL */
+    .modal-overlay {
+      position:fixed; inset:0; z-index:800;
+      background:rgba(0,0,0,0.72); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+      display:none; align-items:center; justify-content:center; padding:24px;
+    }
+    .modal-overlay.open { display:flex; }
+    .modal {
+      background:rgba(14,14,14,0.98); border:1px solid rgba(255,255,255,0.09);
+      border-radius:24px; padding:36px; max-width:460px; width:100%;
+      box-shadow:0 40px 100px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.07);
+      animation:popIn2 .3s cubic-bezier(.34,1.56,.64,1) both;
+    }
+    @keyframes popIn2 { from{opacity:0;transform:scale(.93) translateY(16px)} to{opacity:1;transform:scale(1) translateY(0)} }
+    .modal h3 { font-size:20px; font-weight:700; margin-bottom:6px; letter-spacing:-.03em; }
+    .modal p  { font-size:13px; color:var(--muted); margin-bottom:22px; }
+    .fg-m { margin-bottom:14px; }
+    .fg-m label { display:block; font-size:11px; font-weight:500; color:var(--muted); margin-bottom:6px; text-transform:uppercase; letter-spacing:.03em; }
+    .fg-m input, .fg-m textarea {
+      width:100%; padding:12px 14px; border-radius:11px;
+      background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.09);
+      color:var(--text); font-size:14px; outline:none; font-family:inherit; transition:all .18s;
+    }
+    .fg-m textarea { resize:vertical; min-height:90px; }
+    .fg-m input:focus,.fg-m textarea:focus { border-color:rgba(41,151,255,0.5); box-shadow:0 0 0 3px rgba(41,151,255,0.08); }
+    .fg-m input::placeholder,.fg-m textarea::placeholder { color:var(--muted2); }
+    .two-col-m { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .modal-err { font-size:12px; color:var(--red); margin-bottom:12px; display:none; padding:8px 12px; background:rgba(255,69,58,0.08); border-radius:8px; border:1px solid rgba(255,69,58,0.18); }
+    .modal-err.show { display:block; }
+    .modal-row { display:flex; gap:10px; margin-top:4px; }
+    .btn-cancel  { flex:1; padding:13px; border-radius:11px; font-size:14px; font-weight:500; background:rgba(255,255,255,0.06); border:1px solid var(--border); color:var(--text); cursor:none; font-family:inherit; transition:all .18s; }
+    .btn-cancel:hover { background:rgba(255,255,255,0.1); }
+    .btn-confirm { flex:1; padding:13px; border-radius:11px; font-size:14px; font-weight:600; background:var(--blue); border:none; color:#fff; cursor:none; font-family:inherit; transition:all .18s; }
+    .btn-confirm:hover { background:var(--blue-d); box-shadow:0 6px 22px rgba(41,151,255,0.35); }
+
+    /* TOAST */
+    .toast {
+      position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(10px);
+      background:rgba(20,20,22,0.97); border:1px solid rgba(255,255,255,0.1);
+      color:var(--text); font-size:14px; font-weight:500;
+      padding:12px 26px; border-radius:980px;
+      opacity:0; pointer-events:none; transition:all .3s; z-index:9000;
+      backdrop-filter:blur(12px); box-shadow:0 10px 40px rgba(0,0,0,0.5);
+    }
+    .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+    /* FOOTER */
+    .page-footer {
+      text-align:center; padding:24px; font-size:12px; color:var(--muted2);
+      border-top:1px solid var(--border2); margin-top:40px;
+    }
+    .page-footer strong {
+      background:linear-gradient(110deg,#7B61FF,#2997FF);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    }
+
+    /* RESPONSIVE */
+    @media(max-width:860px) {
+      .row1 { grid-template-columns:1fr 1fr; }
+      .row1>*:first-child { grid-column:span 2; }
+      .row1>button { grid-column:span 2; }
+      .row2 { grid-template-columns:1fr 1fr; }
+      .row2>*:last-child { grid-column:span 2; }
+    }
+    @media(max-width:520px) {
+      .row1,.row2 { grid-template-columns:1fr; }
+      .row1>*:first-child,.row1>button,.row2>*:last-child { grid-column:span 1; }
+      .search-card { padding:20px 16px; }
+      .s-card { flex-direction:column; align-items:flex-start; }
+      .s-actions { align-items:flex-start; flex-direction:row; flex-wrap:wrap; }
+      .two-col-m { grid-template-columns:1fr; }
+      body { cursor:auto; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+<div id="prog"></div>
+
+<!-- NAV -->
+<nav id="mainNav">
+  <a href="../index.html" class="logo">Biz<em>Boost</em></a>
+  <div class="nav-right">
+    <div class="user-pill">
+      <div class="user-av" id="userAv">?</div>
+      <span id="userGreet">Hi there</span>
+    </div>
+    <button class="nav-btn edit-btn" onclick="openEditModal()">✏️ Edit Profile</button>
+    <button class="nav-btn logout-btn" id="logoutBtn">Sign out</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-text">
+    <h1>Find Suppliers &amp; Sellers Across India</h1>
+    <p>Google Maps · JustDial · IndiaMart · TradeIndia · Sulekha — all at once</p>
+    <div class="powered-tag">⚡ Powered by <strong>&nbsp;Sha4ow AI</strong></div>
+  </div>
+
+  <!-- SEARCH CARD -->
+  <div class="search-card">
+    <div class="card-label">🎯 What are you looking for?</div>
+
+    <div class="row1">
+      <div class="fg">
+        <label>Product / Service *</label>
+        <input type="text" id="s_product" placeholder="e.g. Paper Bags, Cotton Fabric, Electronics…" onkeydown="if(event.key==='Enter')doSearch()">
+      </div>
+      <div class="fg">
+        <label>City *</label>
+        <input type="text" id="s_city" placeholder="e.g. Vadodara" onkeydown="if(event.key==='Enter')doSearch()">
+      </div>
+      <div class="fg">
+        <label>State</label>
+        <input type="text" id="s_state" placeholder="e.g. Gujarat">
+      </div>
+      <div class="fg">
+        <label>Quantity</label>
+        <div class="qty-wrap">
+          <input type="number" id="s_quantity" placeholder="100">
+          <select id="s_unit">
+            <option>pcs</option><option>kg</option><option>ton</option>
+            <option>ltr</option><option>box</option><option>set</option>
+            <option>mtr</option><option>bag</option>
+          </select>
+        </div>
+      </div>
+      <button class="search-btn" id="searchBtn" onclick="doSearch()">🔍 Search</button>
+    </div>
+
+    <div class="row2">
+      <div class="fg">
+        <label>Budget Min (₹)</label>
+        <input type="number" id="s_budget_min" placeholder="5,000">
+      </div>
+      <div class="fg">
+        <label>Budget Max (₹)</label>
+        <input type="number" id="s_budget_max" placeholder="50,000">
+      </div>
+      <div class="fg">
+        <label>Delivery City (if different)</label>
+        <input type="text" id="s_delivery" placeholder="Leave blank if same as above">
+      </div>
+      <div style="display:flex;align-items:flex-end;padding-bottom:2px">
+        <div id="leadStatus"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div class="results-area">
+  <div class="pills-wrap" id="pillsWrap">
+    <div class="pills-row" id="pillsContainer"></div>
+  </div>
+  <div id="results">
+    <div class="init-state">
+      <div class="init-icon">🔍</div>
+      <div class="init-title">Search for suppliers near you</div>
+      <p class="init-sub">Enter a product and city above to find verified local sellers.<br>Your search is also saved as a lead — so sellers can find you too.</p>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="page-footer">
+  Powered by <strong>Sha4ow AI</strong> &nbsp;·&nbsp; Made with ♥ by <span style="color:#2997ff;font-weight:600">Rushi Bhatt</span>
+</div>
+
+<!-- CONNECT MODAL -->
+<div class="modal-overlay" id="connectModal">
+  <div class="modal">
+    <h3>Send Requirement</h3>
+    <p id="modalSellerName"></p>
+    <input type="hidden" id="modalSellerId">
+    <div class="fg-m">
+      <label>Your Requirement</label>
+      <textarea id="connectMsg" rows="4" placeholder="I need X quantity of Y at ₹Z budget. Please contact me."></textarea>
+    </div>
+    <div class="fg-m">
+      <label>Your Phone (shown to seller)</label>
+      <input type="tel" id="connectPhone" placeholder="9876543210">
+    </div>
+    <div class="modal-err" id="connectError"></div>
+    <div class="modal-row">
+      <button class="btn-cancel" onclick="closeModal('connectModal')">Cancel</button>
+      <button class="btn-confirm" onclick="sendConnect()">Send →</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <h3>Update Your Details</h3>
+    <p>Your default search preferences</p>
+    <div class="fg-m">
+      <label>Default Requirement</label>
+      <textarea id="edit_requirement" rows="3" placeholder="What do you usually buy?"></textarea>
+    </div>
+    <div class="two-col-m">
+      <div class="fg-m"><label>City</label><input type="text" id="edit_city"></div>
+      <div class="fg-m"><label>State</label><input type="text" id="edit_state"></div>
+      <div class="fg-m"><label>Budget Min (₹)</label><input type="number" id="edit_budget_min"></div>
+      <div class="fg-m"><label>Budget Max (₹)</label><input type="number" id="edit_budget_max"></div>
+    </div>
+    <div class="modal-row">
+      <button class="btn-cancel" onclick="closeModal('editModal')">Cancel</button>
+      <button class="btn-confirm" onclick="saveEdit()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = "../api";
+let buyer = JSON.parse(localStorage.getItem("buyer") || "null");
+let allData = {};
+
+// ── AUTH GUARD ──────────────────────────────────────
+if (!buyer) location.href = "register.html";
+
+// ── CURSOR ──────────────────────────────────────────
+const cursorEl   = document.getElementById('cursor');
+const cursorRing = document.getElementById('cursor-ring');
+let cx = 0, cy = 0, rx = 0, ry = 0;
+document.addEventListener('mousemove', e => {
+  cx = e.clientX; cy = e.clientY;
+  cursorEl.style.left = cx + 'px';
+  cursorEl.style.top  = cy + 'px';
+});
+(function ringTick() {
+  rx += (cx - rx) * 0.12; ry += (cy - ry) * 0.12;
+  cursorRing.style.left = rx + 'px';
+  cursorRing.style.top  = ry + 'px';
+  requestAnimationFrame(ringTick);
+})();
+document.querySelectorAll('a,button,.s-card,.pill').forEach(el => {
+  el.addEventListener('mouseenter', () => cursorRing.classList.add('hover'));
+  el.addEventListener('mouseleave', () => cursorRing.classList.remove('hover'));
+});
+
+// ── SCROLL PROGRESS + NAV ─────────────────────────
+window.addEventListener('scroll', () => {
+  const s = window.scrollY, h = document.documentElement.scrollHeight - innerHeight;
+  document.getElementById('prog').style.width = (s / h * 100) + '%';
+  document.getElementById('mainNav').classList.toggle('scrolled', s > 20);
+}, { passive: true });
+
+// ── INIT UI ─────────────────────────────────────────
+const firstName = (buyer?.name || '').split(' ')[0] || 'there';
+document.getElementById('userGreet').textContent = 'Hi, ' + firstName;
+document.getElementById('userAv').textContent    = (firstName[0] || '?').toUpperCase();
+document.getElementById('s_city').value          = buyer?.city       || '';
+document.getElementById('s_state').value         = buyer?.state      || '';
+document.getElementById('s_budget_min').value    = buyer?.budget_min || '';
+document.getElementById('s_budget_max').value    = buyer?.budget_max || '';
+if (buyer?.requirement) document.getElementById('s_product').value = buyer.requirement;
+
+// Pre-fill from URL params (coming from index.html search bar)
+const params = new URLSearchParams(location.search);
+if (params.get('product')) document.getElementById('s_product').value = params.get('product');
+if (params.get('city'))    document.getElementById('s_city').value    = params.get('city');
+
+// ── LOGOUT ──────────────────────────────────────────
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  localStorage.removeItem('buyer');
+  location.href = '../index.html';
+});
+
+// ── TOAST ────────────────────────────────────────────
+function toast(msg, dur = 3500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), dur);
+}
+
+// ── BADGE HELPERS ────────────────────────────────────
+function srcBadge(src) {
+  const map = {
+    'Google Maps':'b-maps','JustDial':'b-justdial','IndiaMart':'b-indiamart',
+    'TradeIndia':'b-tradeindia','Sulekha':'b-sulekha','Udaan':'b-udaan',
+    'ExportersIndia':'b-exporters','YellowPages':'b-yellow','Web':'b-web',
+  };
+  return `<span class="badge ${map[src] || 'b-web'}">${src}</span>`;
+}
+function trustBadge(score) {
+  if (score >= 5) return `<span class="badge b-trust-hi">🔒 High Trust</span>`;
+  if (score >= 3) return `<span class="badge b-trust-med">✔ Trusted</span>`;
+  return '';
+}
+
+// ── PLATFORM PILLS ───────────────────────────────────
+function buildPills(grouped) {
+  const platforms = Object.keys(grouped);
+  if (!platforms.length) return;
+  const c = document.getElementById('pillsContainer');
+  c.innerHTML = `<span class="pill on" onclick="filterBy('all',this)">All</span>` +
+    platforms.map(p => `<span class="pill" onclick="filterBy('${p}',this)">${p} <b>${grouped[p].length}</b></span>`).join('');
+  document.getElementById('pillsWrap').style.display = 'block';
+}
+
+function filterBy(platform, el) {
+  document.querySelectorAll('.pill').forEach(p => p.classList.remove('on'));
+  el.classList.add('on');
+  const product = document.getElementById('s_product').value.trim();
+  const city    = document.getElementById('s_city').value.trim();
+  if (platform === 'all') { renderResults(allData, city, product); return; }
+  const filtered = { ...allData, db_sellers: [], external: (allData.external || []).filter(e => (e.platforms || [e.source]).includes(platform)) };
+  renderResults(filtered, city, product);
+}
+
+// ── SEARCH ───────────────────────────────────────────
+async function doSearch() {
+  const product   = document.getElementById('s_product').value.trim();
+  const city      = document.getElementById('s_city').value.trim();
+  const state     = document.getElementById('s_state').value.trim();
+  const quantity  = document.getElementById('s_quantity').value.trim();
+  const unit      = document.getElementById('s_unit').value;
+  const budgetMin = document.getElementById('s_budget_min').value || 0;
+  const budgetMax = document.getElementById('s_budget_max').value || 0;
+
+  if (!product) { toast('⚠️ Please enter a product or service'); document.getElementById('s_product').focus(); return; }
+  if (!city)    { toast('⚠️ Please enter your city'); document.getElementById('s_city').focus(); return; }
+
+  const btn = document.getElementById('searchBtn');
+  btn.disabled = true; btn.textContent = 'Searching…';
+  document.getElementById('pillsWrap').style.display = 'none';
+  document.getElementById('leadStatus').innerHTML = `<span style="font-size:11px;color:var(--muted)">💾 Saving…</span>`;
+
+  // Save lead
+  try {
+    const lr = await fetch(`${API}/save_lead.php`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ buyer_id: buyer.id, buyer_name: buyer.name, buyer_phone: buyer.contact, product, city, state, quantity, unit, budget_min: budgetMin, budget_max: budgetMax })
+    });
+    const ld = await lr.json();
+    document.getElementById('leadStatus').innerHTML = ld.success
+      ? `<span class="lead-pill">✅ Lead #${ld.lead_id || ''} saved</span>`
+      : `<span style="font-size:11px;color:var(--muted)">Lead saved</span>`;
+  } catch { document.getElementById('leadStatus').innerHTML = `<span style="font-size:11px;color:var(--muted)">Lead saved</span>`; }
+
+  // Loading animation
+  const steps = ['Verified sellers','Google Maps','JustDial','IndiaMart','TradeIndia','Sorting'];
+  document.getElementById('results').innerHTML = `
+    <div class="loader">
+      <div class="spin-ring"></div>
+      <div class="loader-main">Searching for <strong>"${escH(product)}"</strong> in <strong>${escH(city)}</strong></div>
+      <div class="loader-sub" id="loaderSub">Checking verified sellers…</div>
+      <div class="search-steps" id="searchSteps">
+        ${steps.map((s,i) => `<div class="search-step" id="ss${i}"><div class="step-dot"></div>${s}</div>`).join('')}
+      </div>
+    </div>`;
+
+  let si = 0;
+  const statuses = ['Checking verified sellers…','Fetching Google Maps results…','Scanning JustDial listings…','Checking IndiaMart suppliers…','Searching TradeIndia & Sulekha…','Sorting by trust score…'];
+  const ticker = setInterval(() => {
+    const subEl = document.getElementById('loaderSub');
+    const ssEl  = document.getElementById('ss' + si);
+    if (subEl && si < statuses.length) {
+      subEl.textContent = statuses[si];
+      if (si > 0) { const prev = document.getElementById('ss' + (si-1)); if(prev) { prev.classList.remove('active'); prev.classList.add('done'); } }
+      if (ssEl) ssEl.classList.add('active');
+      si++;
+    }
+  }, 1800);
+
+  // Fetch
+  try {
+    const res  = await fetch(`${API}/buyer_match.php`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ product, city, state, quantity })
+    });
+    const text = await res.text();
+    let data;
+    try { data = JSON.parse(text); }
+    catch(e) { throw new Error('Server error: ' + text.substring(0,200)); }
+
+    clearInterval(ticker);
+    if (!data.success && data.error) throw new Error(data.error);
+    allData = data;
+
+    const grouped = {};
+    (data.external || []).forEach(e => {
+      (e.platforms || [e.source || 'Web']).forEach(p => {
+        if (!grouped[p]) grouped[p] = [];
+        grouped[p].push(e);
+      });
+    });
+
+    buildPills(grouped);
+    renderResults(data, city, product);
+
+  } catch (err) {
+    clearInterval(ticker);
+    document.getElementById('results').innerHTML = `
+      <div class="empty">
+        <div class="empty-icon">⚠️</div>
+        <h3>Something went wrong</h3>
+        <p style="color:var(--red);font-weight:600;margin-bottom:8px">${escH(err.message)}</p>
+        <p>Please try again or check your connection.</p>
+        <button class="a-send" style="margin-top:16px" onclick="doSearch()">↩ Retry</button>
+      </div>`;
+  } finally {
+    btn.disabled = false; btn.textContent = '🔍 Search';
+  }
+}
+
+// ── RENDER RESULTS ───────────────────────────────────
+function renderResults(data, city, product) {
+  const container = document.getElementById('results');
+  let   db    = data.db_sellers || [];
+  const ext   = data.external   || [];
+  const cnts  = data.counts     || {};
+
+  // ── Sort: featured first (by featured_order), then rest ──────
+  const featured = db.filter(s => s.is_featured).sort((a,b) => (a.featured_order||0) - (b.featured_order||0));
+  const regular  = db.filter(s => !s.is_featured);
+  db = [...featured, ...regular];
+
+  const total = db.length + ext.length;
+
+  if (total === 0) {
+    container.innerHTML = `
+      <div class="empty">
+        <div class="empty-icon">😔</div>
+        <h3>No results found in ${escH(city)}</h3>
+        <p>Try a shorter product name or check spelling.</p>
+        <p style="color:var(--blue);margin-top:12px;font-size:13px;font-weight:500">✅ Your lead is saved — sellers in ${escH(city)} will see your requirement.</p>
+      </div>`;
+    return;
+  }
+
+  const featuredCount = featured.length;
+  let html = `
+    <div class="stats-bar">
+      <span class="stat-total">${total} result${total !== 1 ? 's' : ''} for "${escH(product)}" in ${escH(city)}</span>
+      ${featuredCount ? `<span class="stat-item" style="background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.25);color:#f59e0b">⭐ ${featuredCount} featured</span>` : ''}
+      ${cnts.with_phone  ? `<span class="stat-item stat-phone">📞 ${cnts.with_phone} verified numbers</span>` : ''}
+      ${cnts.google_maps ? `<span class="stat-item stat-maps">📍 ${cnts.google_maps} from Google Maps</span>` : ''}
+      <span class="stat-item stat-lead">✅ Lead saved</span>
+    </div>`;
+
+  if (db.length) {
+    html += `<div class="sec-lbl">⭐ BizBoost Sellers — Direct Contact <span>(${db.length})</span></div>`;
+    html += db.map((s,i) => {
+      const isFeatured = !!s.is_featured;
+      const isVerified = !!s.is_verified;
+      const cardClass  = ['s-card','verified', isFeatured ? 'is-featured' : ''].filter(Boolean).join(' ');
+      return `
+      <div class="${cardClass}" style="animation-delay:${i * .05}s">
+        ${isFeatured ? `<div class="featured-crown">⭐ FEATURED</div>` : ''}
+        <div class="s-info">
+          <div class="s-name">
+            ${escH(s.name)}
+            ${isFeatured ? `<span class="badge-featured">⭐ Featured</span>` : ''}
+            ${isVerified ? `<span class="badge-verified-bb">✅ Verified by BizBoost</span>` : ''}
+          </div>
+          <div class="s-sub">${escH(s.category)} · ${escH(s.city)}, ${escH(s.state)}</div>
+          <div class="s-meta">
+            ${s.website ? `<a href="${s.website}" target="_blank" class="web-link">🌐 ${s.website.replace(/^https?:\/\//,'').substring(0,32)}</a>` : ''}
+          </div>
+        </div>
+        <div class="s-actions">
+          ${s.contact ? `<a href="tel:${s.contact}" class="a-call">📞 ${s.contact}</a>` : `<span style="font-size:12px;color:var(--muted)">No number listed</span>`}
+          <button class="a-send" onclick="openConnect(${s.id},'${esc(s.name)}')">Send Requirement →</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  if (ext.length) {
+    const byPlatform = {};
+    ext.forEach(e => {
+      const primary = (e.platforms && e.platforms[0]) || e.source || 'Web';
+      if (!byPlatform[primary]) byPlatform[primary] = [];
+      byPlatform[primary].push(e);
+    });
+
+    let cardIdx = db.length;
+    for (const [platform, items] of Object.entries(byPlatform)) {
+      const withPhone = items.filter(i => i.contact).length;
+      html += `<div class="sec-lbl">${escH(platform)} <span>(${items.length} result${items.length !== 1 ? 's' : ''}${withPhone ? ' · ' + withPhone + ' with phone' : ''})</span></div>`;
+      html += items.map(s => {
+        const platforms = s.platforms || [s.source || 'Web'];
+        const badges    = [...new Set(platforms)].map(p => srcBadge(p)).join(' ');
+        const tBadge    = trustBadge(s.trust_score || 0);
+        const hasPhone  = !!s.contact;
+        const viewLinks = [...new Set(platforms)].map(p => {
+          const url = s['url_' + p] || (platforms.length === 1 ? s.url : '');
+          return url ? `<a href="${url}" target="_blank" class="a-view">View on ${p} ↗</a>` : '';
+        }).filter(Boolean).join('');
+        const delay = (cardIdx++) * .04;
+        return `
+          <div class="s-card ${hasPhone ? 'has-phone' : ''}" style="animation-delay:${delay}s">
+            <div class="s-info">
+              <div class="s-name">${escH(s.name)} ${badges} ${tBadge}</div>
+              <div class="s-sub">${escH(s.address || city)}</div>
+              <div class="s-meta">
+                ${s.rating ? `<span class="rating">⭐ ${s.rating}<span>(${(s.reviews||0).toLocaleString()} reviews)</span></span>` : ''}
+                ${s.website ? `<a href="${s.website}" target="_blank" class="web-link">🌐 ${s.website.replace(/^https?:\/\//,'').substring(0,28)}</a>` : ''}
+                ${platforms.length > 1 ? `<span style="font-size:12px;color:var(--green);font-weight:600">✔ Found on ${platforms.length} platforms</span>` : ''}
+              </div>
+            </div>
+            <div class="s-actions">
+              ${hasPhone ? `<a href="tel:${s.contact}" class="a-call">📞 ${s.contact}</a>` : `<span style="font-size:11px;color:var(--muted)">Number not public</span>`}
+              ${viewLinks}
+            </div>
+          </div>`;
+      }).join('');
+    }
+  }
+
+  container.innerHTML = html;
+}
+
+// ── CONNECT MODAL ────────────────────────────────────
+function openConnect(id, name) {
+  const product   = document.getElementById('s_product').value;
+  const qty       = document.getElementById('s_quantity').value;
+  const unit      = document.getElementById('s_unit').value;
+  const budgetMax = document.getElementById('s_budget_max').value;
+  const autoMsg   = `Hi, I'm looking for ${product}` + (qty ? `, quantity: ${qty} ${unit}` : '') + (budgetMax ? `, budget up to ₹${Number(budgetMax).toLocaleString()}` : '') + `. Please contact me.`;
+  document.getElementById('modalSellerId').value         = id;
+  document.getElementById('modalSellerName').textContent = 'To: ' + name;
+  document.getElementById('connectMsg').value            = autoMsg;
+  document.getElementById('connectPhone').value          = buyer?.contact || '';
+  document.getElementById('connectError').classList.remove('show');
+  document.getElementById('connectModal').classList.add('open');
+}
+
+async function sendConnect() {
+  const sellerId = document.getElementById('modalSellerId').value;
+  const message  = document.getElementById('connectMsg').value.trim();
+  const errEl    = document.getElementById('connectError');
+  if (!message) { errEl.textContent = 'Please write a message.'; errEl.classList.add('show'); return; }
+  errEl.classList.remove('show');
+  try {
+    const res  = await fetch(`${API}/connect.php`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ buyer_id: buyer.id, seller_id: parseInt(sellerId), message })
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+    closeModal('connectModal');
+    toast('✅ Request sent! The seller will contact you shortly.');
+  } catch (err) {
+    errEl.textContent = '❌ ' + err.message;
+    errEl.classList.add('show');
+  }
+}
+
+// ── EDIT MODAL ───────────────────────────────────────
+function openEditModal() {
+  document.getElementById('edit_requirement').value = buyer?.requirement || '';
+  document.getElementById('edit_city').value        = buyer?.city        || '';
+  document.getElementById('edit_state').value       = buyer?.state       || '';
+  document.getElementById('edit_budget_min').value  = buyer?.budget_min  || '';
+  document.getElementById('edit_budget_max').value  = buyer?.budget_max  || '';
+  document.getElementById('editModal').classList.add('open');
+}
+
+function saveEdit() {
+  buyer.requirement = document.getElementById('edit_requirement').value.trim();
+  buyer.city        = document.getElementById('edit_city').value.trim();
+  buyer.state       = document.getElementById('edit_state').value.trim();
+  buyer.budget_min  = document.getElementById('edit_budget_min').value;
+  buyer.budget_max  = document.getElementById('edit_budget_max').value;
+  localStorage.setItem('buyer', JSON.stringify(buyer));
+  document.getElementById('s_city').value  = buyer.city;
+  document.getElementById('s_state').value = buyer.state;
+  closeModal('editModal');
+  toast('✅ Profile updated');
+  doSearch();
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+document.querySelectorAll('.modal-overlay').forEach(o => {
+  o.addEventListener('click', e => { if (e.target === o) closeModal(o.id); });
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.open').forEach(o => closeModal(o.id));
+});
+
+function esc(str)  { return (str || '').replace(/'/g,"\\'").replace(/"/g,'&quot;'); }
+function escH(str) { return (str || '').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// Auto-search on load if params given or buyer has existing preference
+window.addEventListener('DOMContentLoaded', () => {
+  const hasParams = params.get('product') || params.get('city');
+  if (hasParams || (buyer?.city && buyer?.requirement)) setTimeout(doSearch, 400);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Seller Register — BizBoost</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Syne:wght@600;700;800&display=swap');
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#000;--s2:#111113;--s3:#1a1a1c;--s4:#242426;
+      --border:rgba(255,255,255,0.09);--border2:rgba(255,255,255,0.05);
+      --text:#f5f5f7;--muted:rgba(245,245,247,0.52);--muted2:rgba(245,245,247,0.28);
+      --blue:#2997ff;--blue-d:#147ce5;--green:#30d158;--orange:#ff9f0a;--red:#ff453a;--purple:#bf5af2;
+      --nav-h:52px;
+    }
+    html{scroll-behavior:smooth}
+    body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;
+         background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;min-height:100vh}
+
+    nav{position:fixed;top:0;left:0;right:0;z-index:300;height:var(--nav-h);
+        display:flex;align-items:center;justify-content:space-between;padding:0 28px;
+        background:rgba(0,0,0,0.82);backdrop-filter:saturate(180%) blur(20px);
+        border-bottom:1px solid var(--border)}
+    .logo{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:var(--text);text-decoration:none;letter-spacing:-0.03em}
+    .logo em{color:var(--blue);font-style:normal}
+
+    /* PAGE */
+    .page{min-height:100vh;display:flex;align-items:center;justify-content:center;
+          padding:calc(var(--nav-h)+40px) 20px 60px;position:relative;overflow:hidden}
+    .bg-glow{position:absolute;inset:0;pointer-events:none;
+      background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(41,151,255,0.2),transparent 55%),
+                radial-gradient(ellipse 50% 40% at 90% 95%,rgba(191,90,242,0.08),transparent 50%)}
+    .bg-grid{position:absolute;inset:0;pointer-events:none;
+      background-image:linear-gradient(rgba(255,255,255,0.025) 1px,transparent 1px),
+                       linear-gradient(90deg,rgba(255,255,255,0.025) 1px,transparent 1px);
+      background-size:60px 60px;
+      mask-image:radial-gradient(ellipse 75% 65% at 50% 40%,black,transparent)}
+
+    /* BOX */
+    .box{position:relative;z-index:2;background:rgba(255,255,255,0.04);
+         border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:40px;
+         width:100%;max-width:500px;backdrop-filter:blur(12px);
+         box-shadow:0 40px 80px rgba(0,0,0,0.65);
+         animation:rise .6s cubic-bezier(.22,1,.36,1) both}
+    @keyframes rise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+
+    .box-head{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;letter-spacing:-0.03em;margin-bottom:4px}
+    .box-head em{color:var(--blue);font-style:normal}
+    .box-sub{font-size:14px;color:var(--muted);margin-bottom:26px;line-height:1.55}
+
+    /* TABS */
+    .tabs{display:flex;background:rgba(255,255,255,0.06);border-radius:12px;padding:3px;margin-bottom:26px}
+    .tab{flex:1;text-align:center;padding:8px;border:none;background:none;border-radius:9px;
+         font-size:14px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .2s;font-family:inherit}
+    .tab.on{background:var(--s3);color:var(--text);box-shadow:0 1px 6px rgba(0,0,0,.45)}
+
+    /* FORM */
+    .g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .fg{margin-bottom:14px}
+    .fg label{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--muted);
+              margin-bottom:6px;letter-spacing:.04em;text-transform:uppercase}
+    .req{font-size:9px;font-weight:700;background:rgba(255,159,10,.14);border:1px solid rgba(255,159,10,.22);
+         color:var(--orange);padding:1px 6px;border-radius:980px;letter-spacing:.03em}
+    .opt{font-size:9px;font-weight:600;background:rgba(255,255,255,.07);border:1px solid var(--border2);
+         color:var(--muted2);padding:1px 6px;border-radius:980px}
+    .fg input,.fg select,.fg textarea{
+      width:100%;padding:11px 14px;background:rgba(255,255,255,.07);
+      border:1px solid rgba(255,255,255,.1);border-radius:10px;
+      color:var(--text);font-size:14px;outline:none;transition:all .2s;font-family:inherit}
+    .fg input::placeholder,.fg textarea::placeholder{color:var(--muted2)}
+    .fg input:focus,.fg select:focus,.fg textarea:focus{
+      border-color:rgba(41,151,255,.5);box-shadow:0 0 0 3px rgba(41,151,255,.1);
+      background:rgba(255,255,255,.1)}
+    .fg select option{background:#1a1a1c}
+    .fg input:focus::placeholder{color:transparent}
+
+    /* Password strength */
+    .pwd-bars{display:flex;gap:4px;margin-top:6px}
+    .pwd-bar{flex:1;height:2px;border-radius:2px;background:rgba(255,255,255,.08);transition:background .3s}
+    .pb-w{background:var(--red)} .pb-m{background:var(--orange)} .pb-s{background:var(--green)}
+    .pwd-hint{font-size:11px;color:var(--muted);margin-top:4px}
+
+    /* Error */
+    .err{display:none;font-size:12px;color:var(--red);margin-top:10px;padding:10px 14px;
+         background:rgba(255,69,58,.08);border:1px solid rgba(255,69,58,.2);border-radius:8px}
+    .err.on{display:block}
+
+    /* Submit button */
+    .btn-main{width:100%;padding:13px;border-radius:10px;background:var(--blue);color:#fff;
+              border:none;font-size:15px;font-weight:600;cursor:pointer;transition:all .22s;
+              margin-top:10px;font-family:inherit;position:relative;overflow:hidden}
+    .btn-main::after{content:'';position:absolute;inset:0;
+      background:linear-gradient(90deg,transparent 30%,rgba(255,255,255,.15) 50%,transparent 70%);
+      transform:translateX(-100%);transition:transform .5s}
+    .btn-main:hover::after{transform:translateX(100%)}
+    .btn-main:hover{background:var(--blue-d);box-shadow:0 8px 24px rgba(41,151,255,.28)}
+    .btn-main:active{transform:scale(.98)}
+    .btn-main:disabled{opacity:.5;cursor:not-allowed}
+    .tos{font-size:12px;color:var(--muted2);text-align:center;margin-top:14px;line-height:1.5}
+    .sw{text-align:center;font-size:13px;color:var(--muted);margin-top:18px}
+    .sw a{color:var(--blue);cursor:pointer;text-decoration:none}
+    .sw a:hover{text-decoration:underline}
+
+    /* Toast */
+    .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(10px);
+           background:rgba(18,18,20,.96);border:1px solid rgba(255,255,255,.12);
+           color:var(--text);font-size:14px;font-weight:500;padding:12px 24px;
+           border-radius:980px;opacity:0;pointer-events:none;transition:all .3s;z-index:999;
+           backdrop-filter:blur(12px);box-shadow:0 8px 32px rgba(0,0,0,.5)}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+    @media(max-width:540px){.box{padding:28px 20px} .g2{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<nav>
+  <a href="../index.html" class="logo">Biz<em>Boost</em></a>
+</nav>
+
+<div class="page">
+  <div class="bg-glow"></div>
+  <div class="bg-grid"></div>
+  <div class="box">
+    <div class="box-head">Biz<em>Boost</em> for Business</div>
+    <p class="box-sub">Understand your market. Outgrow your local competitors with AI.</p>
+
+    <div class="tabs">
+      <button class="tab on" id="tReg" onclick="switchTab('register')">Create Account</button>
+      <button class="tab" id="tLog" onclick="switchTab('login')">Sign In</button>
+    </div>
+
+    <!-- REGISTER FORM -->
+    <form id="registerForm" onsubmit="handleRegister(event)">
+      <div class="g2">
+        <div class="fg">
+          <label>Business Name <span class="req">Required</span></label>
+          <input type="text" id="r_name" placeholder="e.g. Rushi Electronics" required>
+        </div>
+        <div class="fg">
+          <label>Category <span class="req">Required</span></label>
+          <select id="r_category" required>
+            <option value="">Select...</option>
+            <option>Electronics</option><option>Clothing &amp; Apparel</option>
+            <option>Food &amp; Restaurant</option><option>Furniture</option>
+            <option>Hardware &amp; Tools</option><option>Medical &amp; Pharmacy</option>
+            <option>Real Estate</option><option>Education</option>
+            <option>Salon &amp; Beauty</option><option>Automobile</option>
+            <option>Grocery</option><option>IT Services</option>
+            <option>Printing &amp; Packaging</option><option>Textile &amp; Fabric</option>
+            <option>Agriculture</option><option>Construction</option><option>Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="g2">
+        <div class="fg">
+          <label>City <span class="req">Required</span></label>
+          <input type="text" id="r_city" placeholder="e.g. Vadodara" required>
+        </div>
+        <div class="fg">
+          <label>State <span class="req">Required</span></label>
+          <input type="text" id="r_state" placeholder="e.g. Gujarat" required>
+        </div>
+      </div>
+      <div class="fg">
+        <label>Business Website <span class="opt">Optional</span></label>
+        <input type="url" id="r_website" placeholder="https://yoursite.com">
+      </div>
+      <div class="g2">
+        <div class="fg">
+          <label>Email <span class="req">Required</span></label>
+          <input type="email" id="r_email" placeholder="you@business.com" required>
+        </div>
+        <div class="fg">
+          <label>Phone <span class="req">Required</span></label>
+          <input type="tel" id="r_contact" placeholder="9876543210" required>
+        </div>
+      </div>
+      <div class="fg">
+        <label>Password <span class="req">Required</span></label>
+        <input type="password" id="r_password" placeholder="Min 8 characters" required minlength="8"
+               oninput="chkPwd(this.value)">
+        <div class="pwd-bars">
+          <div class="pwd-bar" id="pb1"></div><div class="pwd-bar" id="pb2"></div>
+          <div class="pwd-bar" id="pb3"></div><div class="pwd-bar" id="pb4"></div>
+        </div>
+        <div class="pwd-hint" id="pwdHint">Enter a strong password</div>
+      </div>
+      <div class="err" id="regErr"></div>
+      <button type="submit" class="btn-main" id="regBtn">Create Free Account →</button>
+      <p class="tos">By signing up you agree to our Terms &amp; Privacy Policy.</p>
+      <div class="sw">Already have an account? <a onclick="switchTab('login')">Sign in →</a></div>
+    </form>
+
+    <!-- LOGIN FORM -->
+    <form id="loginForm" onsubmit="handleLogin(event)" style="display:none">
+      <div class="fg">
+        <label>Email</label>
+        <input type="email" id="l_email" placeholder="you@business.com" required autocomplete="email">
+      </div>
+      <div class="fg">
+        <label>Password</label>
+        <input type="password" id="l_password" placeholder="Your password" required autocomplete="current-password">
+      </div>
+      <div class="err" id="logErr"></div>
+      <button type="submit" class="btn-main" id="logBtn">Sign In →</button>
+      <div class="sw" style="margin-top:16px">New here? <a onclick="switchTab('register')">Create account →</a></div>
+    </form>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script>
+const API='../api';
+function switchTab(t){
+  document.getElementById('tReg').classList.toggle('on',t==='register');
+  document.getElementById('tLog').classList.toggle('on',t==='login');
+  document.getElementById('registerForm').style.display=t==='register'?'block':'none';
+  document.getElementById('loginForm').style.display=t==='login'?'block':'none';
+}
+function toast(msg,dur=3200){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),dur)}
+function showErr(id,msg){const e=document.getElementById(id);e.textContent=msg;e.classList.add('on')}
+function hideErr(id){document.getElementById(id).classList.remove('on')}
+function chkPwd(v){
+  let s=0;if(v.length>=8)s++;if(/[A-Z]/.test(v))s++;if(/[0-9]/.test(v))s++;if(/[^A-Za-z0-9]/.test(v))s++;
+  ['pb1','pb2','pb3','pb4'].forEach((id,i)=>{const el=document.getElementById(id);el.className='pwd-bar';if(i<s)el.classList.add(s<=1?'pb-w':s<=2?'pb-m':'pb-s')});
+  const h=document.getElementById('pwdHint');
+  h.textContent=v?['','Weak','Fair','Good','Strong'][s]||'Weak':'Enter a strong password';
+  h.style.color=s<=1?'var(--red)':s<=2?'var(--orange)':'var(--green)';
+}
+async function handleRegister(e){
+  e.preventDefault();hideErr('regErr');
+  const btn=document.getElementById('regBtn');btn.disabled=true;btn.textContent='Creating account…';
+  const p={name:document.getElementById('r_name').value.trim(),category:document.getElementById('r_category').value,
+    city:document.getElementById('r_city').value.trim(),state:document.getElementById('r_state').value.trim(),
+    website:document.getElementById('r_website').value.trim(),email:document.getElementById('r_email').value.trim(),
+    contact:document.getElementById('r_contact').value.trim(),password:document.getElementById('r_password').value};
+  try{
+    const res=await fetch(`${API}/seller_register.php`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(p)});
+    const d=await res.json();if(!d.success)throw new Error(d.error||'Registration failed');
+    const {password:_pw,...safeP}=p;
+    localStorage.setItem('seller',JSON.stringify({...safeP,id:d.seller_id,seller_id:d.seller_id}));
+    toast('✅ Account created! Redirecting…');setTimeout(()=>location.href='../seller/onboard.html',1200);
+  }catch(err){showErr('regErr','❌ '+err.message);btn.disabled=false;btn.textContent='Create Free Account →'}
+}
+async function handleLogin(e){
+  e.preventDefault();hideErr('logErr');
+  const btn=document.getElementById('logBtn');btn.disabled=true;btn.textContent='Signing in…';
+  try{
+    const res=await fetch(`${API}/seller_login.php`,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({email:document.getElementById('l_email').value.trim(),password:document.getElementById('l_password').value})});
+    const d=await res.json();if(!d.success)throw new Error(d.error||'Invalid credentials');
+    localStorage.setItem('seller',JSON.stringify(d.seller));
+    toast('✅ Welcome back!');setTimeout(()=>location.href='../seller/dashboard.html',1200);
+  }catch(err){showErr('logErr','❌ '+err.message);btn.disabled=false;btn.textContent='Sign In →'}
+}
+if(localStorage.getItem('seller'))location.href='dashboard.html';
+</script>
+</body>
+</html>

@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Business Profile · BizBoost</title>
+<style>
+  /* ── Variables ─────────────────────────────────────────────── */
+  :root {
+    --bg:           #f5f5f7;
+    --bg-card:      #ffffff;
+    --bg-nav:       rgba(255,255,255,0.72);
+    --bg-input:     #f5f5f7;
+    --bg-foot:      rgba(251,251,253,0.88);
+    --border:       #d2d2d7;
+    --border-input: #d2d2d7;
+    --text-primary: #1d1d1f;
+    --text-secondary:#6e6e73;
+    --text-label:   #3a3a3c;
+    --accent:       #0071e3;
+    --accent-hover: #0077ed;
+    --accent-light: #e8f0fd;
+    --green:        #34c759;
+    --green-light:  #e9f9ee;
+    --red:          #ff3b30;
+    --orange:       #ff9500;
+    --orange-light: #fff3e0;
+    --shadow-sm:    0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+    --shadow-md:    0 4px 16px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
+    --shadow-lg:    0 12px 40px rgba(0,0,0,.12), 0 4px 8px rgba(0,0,0,.06);
+    --radius-sm:    8px;
+    --radius-md:    12px;
+    --radius-lg:    16px;
+    --radius-xl:    20px;
+    --font:        -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+    --transition:   all 0.2s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  [data-theme="dark"] {
+    --bg:           #000000;
+    --bg-card:      #1c1c1e;
+    --bg-nav:       rgba(28,28,30,0.82);
+    --bg-input:     #2c2c2e;
+    --bg-foot:      rgba(28,28,30,0.92);
+    --border:       #38383a;
+    --border-input: #3a3a3c;
+    --text-primary: #f5f5f7;
+    --text-secondary:#98989d;
+    --text-label:   #ebebf0;
+    --accent:       #2997ff;
+    --accent-hover: #3aa3ff;
+    --accent-light: #1a2d45;
+    --green:        #30d158;
+    --green-light:  #1a3323;
+    --red:          #ff453a;
+    --orange:       #ff9f0a;
+    --orange-light: #2d2010;
+    --shadow-sm:    0 1px 3px rgba(0,0,0,.3), 0 1px 2px rgba(0,0,0,.2);
+    --shadow-md:    0 4px 16px rgba(0,0,0,.4), 0 2px 4px rgba(0,0,0,.2);
+    --shadow-lg:    0 12px 40px rgba(0,0,0,.6), 0 4px 8px rgba(0,0,0,.3);
+  }
+
+  /* ── Reset ─────────────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+
+  /* ── Navbar ────────────────────────────────────────────────── */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    background: var(--bg-nav);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border-bottom: 1px solid var(--border);
+    height: 52px;
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    justify-content: space-between;
+    transition: var(--transition);
+  }
+
+  .nav-logo {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-decoration: none;
+    letter-spacing: -0.3px;
+  }
+
+  .nav-logo span { color: var(--accent); }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .nav-link {
+    font-size: 14px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    padding: 5px 12px;
+    border-radius: 980px;
+    transition: var(--transition);
+    font-weight: 500;
+  }
+
+  .nav-link:hover {
+    color: var(--text-primary);
+    background: var(--bg-input);
+  }
+
+  /* ── Theme Toggle ──────────────────────────────────────────── */
+  .theme-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    transition: var(--transition);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .theme-btn:hover {
+    transform: scale(1.08);
+    box-shadow: var(--shadow-md);
+  }
+
+  /* ── Loading Overlay ───────────────────────────────────────── */
+  .load-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+    gap: 16px;
+    transition: opacity 0.4s ease;
+  }
+
+  .load-overlay.hide {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+
+  .load-overlay p {
+    font-size: 15px;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Page Wrap ─────────────────────────────────────────────── */
+  .page-wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 36px 24px 120px;
+  }
+
+  /* ── Page Header ───────────────────────────────────────────── */
+  .page-header {
+    margin-bottom: 32px;
+    text-align: center;
+  }
+
+  .page-header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+  }
+
+  .page-header p {
+    font-size: 15px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    max-width: 440px;
+    margin: 0 auto;
+  }
+
+  /* ── Progress ──────────────────────────────────────────────── */
+  .prog-wrap {
+    background: var(--border);
+    border-radius: 980px;
+    height: 4px;
+    margin-bottom: 8px;
+    overflow: hidden;
+  }
+
+  .prog-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), #34aadc);
+    border-radius: 980px;
+    transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+    width: 0%;
+  }
+
+  .prog-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    text-align: right;
+    margin-bottom: 28px;
+    font-weight: 500;
+  }
+
+  /* ── Section Card ──────────────────────────────────────────── */
+  .s-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    padding: 24px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+  }
+
+  .s-card:hover {
+    box-shadow: var(--shadow-md);
+  }
+
+  .s-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 18px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .s-card-icon {
+    width: 32px;
+    height: 32px;
+    background: var(--accent-light);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0;
+  }
+
+  .s-card-header h3 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: -0.2px;
+  }
+
+  /* ── Grid ──────────────────────────────────────────────────── */
+  .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+
+  /* ── Form Group ────────────────────────────────────────────── */
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+
+  label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-label);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    letter-spacing: -0.1px;
+  }
+
+  .b-req {
+    font-size: 10px;
+    font-weight: 700;
+    background: var(--orange-light);
+    color: var(--orange);
+    padding: 2px 7px;
+    border-radius: 980px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  .b-opt {
+    font-size: 10px;
+    font-weight: 500;
+    background: var(--bg-input);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    padding: 2px 7px;
+    border-radius: 980px;
+  }
+
+  .b-rec {
+    font-size: 10px;
+    font-weight: 600;
+    background: var(--accent-light);
+    color: var(--accent);
+    padding: 2px 7px;
+    border-radius: 980px;
+  }
+
+  /* ── Inputs ────────────────────────────────────────────────── */
+  input, select, textarea {
+    font-family: var(--font);
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text-primary);
+    background: var(--bg-input);
+    border: 1px solid var(--border-input);
+    border-radius: var(--radius-md);
+    padding: 10px 14px;
+    width: 100%;
+    outline: none;
+    transition: var(--transition);
+    -webkit-appearance: none;
+    appearance: none;
+    line-height: 1.4;
+  }
+
+  input::placeholder, textarea::placeholder {
+    color: var(--text-secondary);
+    font-weight: 400;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--accent);
+    background: var(--bg-card);
+    box-shadow: 0 0 0 3px rgba(0,113,227,0.12);
+  }
+
+  [data-theme="dark"] input:focus,
+  [data-theme="dark"] select:focus,
+  [data-theme="dark"] textarea:focus {
+    box-shadow: 0 0 0 3px rgba(41,151,255,0.18);
+  }
+
+  select {
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236e6e73' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+  }
+
+  textarea { resize: vertical; min-height: 80px; }
+
+  /* ── Tip ───────────────────────────────────────────────────── */
+  .tip {
+    background: var(--bg-input);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+    line-height: 1.6;
+    border-left: 3px solid var(--accent);
+  }
+
+  .tip strong { color: var(--text-primary); font-weight: 600; }
+
+  /* ── GST Valid Badge ───────────────────────────────────────── */
+  .gst-ok {
+    background: var(--green-light);
+    color: var(--green);
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: var(--radius-sm);
+    padding: 7px 12px;
+    margin-top: 4px;
+    display: none;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .gst-ok::before { content: '✓'; font-weight: 700; }
+
+  /* ── Sticky Footer ─────────────────────────────────────────── */
+  .sticky-foot {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: var(--bg-foot);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border-top: 1px solid var(--border);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    z-index: 100;
+  }
+
+  .sticky-foot-info {
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  .sticky-foot-info strong {
+    color: var(--text-primary);
+    font-weight: 600;
+    display: block;
+    font-size: 14px;
+  }
+
+  .foot-actions { display: flex; gap: 10px; }
+
+  /* ── Buttons ───────────────────────────────────────────────── */
+  .btn {
+    font-family: var(--font);
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    border-radius: 980px;
+    padding: 9px 20px;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    letter-spacing: -0.1px;
+  }
+
+  .btn:active { transform: scale(0.97); }
+
+  .btn-secondary {
+    background: var(--bg-input);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+  }
+
+  .btn-secondary:hover {
+    background: var(--border);
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    min-width: 200px;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,113,227,0.3);
+  }
+
+  .btn-primary:hover {
+    background: var(--accent-hover);
+    box-shadow: 0 4px 16px rgba(0,113,227,0.4);
+    transform: translateY(-1px);
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* ── Toast ─────────────────────────────────────────────────── */
+  .toast {
+    position: fixed;
+    bottom: 88px;
+    left: 50%;
+    transform: translateX(-50%) translateY(12px);
+    background: var(--text-primary);
+    color: var(--bg);
+    padding: 11px 22px;
+    border-radius: 980px;
+    font-size: 14px;
+    font-weight: 500;
+    opacity: 0;
+    transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+    z-index: 999;
+    pointer-events: none;
+    white-space: nowrap;
+    box-shadow: var(--shadow-lg);
+    max-width: 90vw;
+    text-align: center;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .toast.success { background: var(--green); color: #fff; }
+  .toast.error   { background: var(--red);   color: #fff; }
+
+  /* ── Section divider ───────────────────────────────────────── */
+  .section-gap { margin-top: 6px; }
+
+  /* ── Responsive ────────────────────────────────────────────── */
+  @media (max-width: 600px) {
+    .g2, .g3 { grid-template-columns: 1fr; }
+    .page-wrap { padding: 24px 16px 110px; }
+    .page-header h1 { font-size: 22px; }
+    .sticky-foot { padding: 10px 16px; }
+    .btn-primary { min-width: 150px; font-size: 13px; }
+    .sticky-foot-info strong { font-size: 13px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Loading Overlay -->
+<div class="load-overlay" id="loadOverlay">
+  <div class="spinner"></div>
+  <p>Loading your profile…</p>
+</div>
+
+<!-- Navbar -->
+<nav>
+  <a href="../index.html" class="nav-logo">Biz<span>Boost</span></a>
+  <div class="nav-right">
+    <a href="dashboard.html" class="nav-link">Dashboard</a>
+    <button class="theme-btn" id="themeBtn" title="Toggle theme" onclick="toggleTheme()">🌙</button>
+  </div>
+</nav>
+
+<!-- Page -->
+<div class="page-wrap">
+
+  <!-- Header -->
+  <div class="page-header">
+    <h1>Complete Your Business Profile</h1>
+    <p>The more details you add, the more accurate your competitor analysis and AI strategy will be.</p>
+  </div>
+
+  <!-- Progress -->
+  <div class="prog-wrap"><div class="prog-bar" id="progBar"></div></div>
+  <div class="prog-label" id="progLabel">Loading…</div>
+
+  <form id="profileForm" onsubmit="saveProfile(event)">
+
+    <!-- ── 1. Basic Info ────────────────────────────────────── -->
+    <div class="s-card">
+      <div class="s-card-header">
+        <div class="s-card-icon">🏢</div>
+        <h3>Basic Business Information</h3>
+      </div>
+      <div class="g2" style="margin-bottom:14px">
+        <div class="form-group">
+          <label>Business Name <span class="b-req">Required</span></label>
+          <input type="text" id="pname" placeholder="Your official business name" required>
+        </div>
+        <div class="form-group">
+          <label>Business Type <span class="b-req">Required</span></label>
+          <select id="pbusinesstype" required>
+            <option value="">Select type…</option>
+            <option>Manufacturer</option>
+            <option>Wholesaler / Distributor</option>
+            <option>Retailer</option>
+            <option>Dealer</option>
+            <option>Exporter</option>
+            <option>Service Provider</option>
+            <option>Trader</option>
+            <option>Franchise</option>
+          </select>
+        </div>
+      </div>
+      <div class="g2" style="margin-bottom:14px">
+        <div class="form-group">
+          <label>Category <span class="b-req">Required</span></label>
+          <select id="pcategory" required>
+            <option value="">Select…</option>
+            <option>Electronics</option>
+            <option>Clothing &amp; Apparel</option>
+            <option>Food &amp; Restaurant</option>
+            <option>Furniture</option>
+            <option>Hardware &amp; Tools</option>
+            <option>Medical &amp; Pharmacy</option>
+            <option>Real Estate</option>
+            <option>Education</option>
+            <option>Salon &amp; Beauty</option>
+            <option>Automobile</option>
+            <option>Grocery</option>
+            <option>IT Services</option>
+            <option>Printing &amp; Packaging</option>
+            <option>Textile &amp; Fabric</option>
+            <option>Agriculture</option>
+            <option>Chemical &amp; Plastics</option>
+            <option>Construction</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Year Established <span class="b-opt">Optional</span></label>
+          <input type="number" id="pyear" placeholder="e.g. 2015" min="1900" max="2026">
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:14px">
+        <label>Products / Services Offered <span class="b-req">Required</span></label>
+        <textarea id="pproducts" rows="3" placeholder="Separate by commas — e.g. tshirt, custom tshirt, cotton kurta, hoodie" required></textarea>
+        <div class="tip"><strong>Use commas to separate products.</strong> These exact keywords find your local competitors.</div>
+      </div>
+      <div class="form-group">
+        <label>Business Description <span class="b-opt">Optional</span></label>
+        <textarea id="pdesc" rows="2" placeholder="What makes you unique? Who are your main customers?"></textarea>
+      </div>
+    </div>
+
+    <!-- ── 2. Location ─────────────────────────────────────── -->
+    <div class="s-card">
+      <div class="s-card-header">
+        <div class="s-card-icon">📍</div>
+        <h3>Location Details</h3>
+      </div>
+      <div class="form-group" style="margin-bottom:14px">
+        <label>Full Business Address <span class="b-req">Required</span></label>
+        <textarea id="paddress" rows="2" placeholder="Shop/Plot No., Street, Area, Landmark" required></textarea>
+      </div>
+      <div class="g3" style="margin-bottom:14px">
+        <div class="form-group">
+          <label>City <span class="b-req">Required</span></label>
+          <input type="text" id="pcity" placeholder="e.g. Vadodara" required>
+        </div>
+        <div class="form-group">
+          <label>State <span class="b-req">Required</span></label>
+          <input type="text" id="pstate" placeholder="e.g. Gujarat" required>
+        </div>
+        <div class="form-group">
+          <label>Pincode <span class="b-opt">Optional</span></label>
+          <input type="text" id="ppincode" placeholder="390001" maxlength="6">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Delivery / Service Radius <span class="b-opt">Optional</span></label>
+        <select id="pdeliveryradius">
+          <option value="">Select…</option>
+          <option>Local only (within city)</option>
+          <option>Within 50 km</option>
+          <option>Within state</option>
+          <option>Pan India</option>
+          <option>International / Export</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- ── 3. Legal & Financial ────────────────────────────── -->
+    <div class="s-card">
+      <div class="s-card-header">
+        <div class="s-card-icon">📋</div>
+        <h3>Legal &amp; Financial</h3>
+      </div>
+      <div class="g2" style="margin-bottom:14px">
+        <div class="form-group">
+          <label>GST Number <span class="b-rec">Recommended</span></label>
+          <input type="text" id="pgst" placeholder="24AABCU9603R1ZM" maxlength="15"
+                 oninput="this.value=this.value.toUpperCase(); checkGST(this.value)">
+          <div class="gst-ok" id="gstOk">Valid GST · State Code: <strong id="gstState"></strong></div>
+        </div>
+        <div class="form-group">
+          <label>Annual Turnover Range <span class="b-opt">Optional</span></label>
+          <select id="pturnover">
+            <option value="">Select…</option>
+            <option>Below ₹10 Lakh</option>
+            <option>₹10L – ₹50L</option>
+            <option>₹50L – ₹1 Crore</option>
+            <option>₹1Cr – ₹5Cr</option>
+            <option>₹5Cr – ₹25Cr</option>
+            <option>Above ₹25 Crore</option>
+          </select>
+        </div>
+      </div>
+      <div class="g2">
+        <div class="form-group">
+          <label>Number of Employees <span class="b-opt">Optional</span></label>
+          <select id="pemployees">
+            <option value="">Select…</option>
+            <option>1–5 (Micro)</option>
+            <option>6–20 (Small)</option>
+            <option>21–50</option>
+            <option>51–200 (Medium)</option>
+            <option>200+ (Large)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Certifications <span class="b-opt">Optional</span></label>
+          <input type="text" id="pcerts" placeholder="ISO, FSSAI, BIS, MSME, Udyam…">
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 4. Contact & Social ─────────────────────────────── -->
+    <div class="s-card">
+      <div class="s-card-header">
+        <div class="s-card-icon">📲</div>
+        <h3>Contact &amp; Social Media</h3>
+      </div>
+      <div class="g2" style="margin-bottom:14px">
+        <div class="form-group">
+          <label>Phone / Mobile <span class="b-req">Required</span></label>
+          <input type="tel" id="pphone" placeholder="9876543210">
+        </div>
+        <div class="form-group">
+          <label>WhatsApp Business <span class="b-opt">Optional</span></label>
+          <input type="tel" id="pwhatsapp" placeholder="9876543210">
+        </div>
+      </div>
+      <div class="g2" style="margin-bottom:14px">
+        <div class="form-group">
+          <label>Website URL <span class="b-opt">Optional</span></label>
+          <input type="url" id="pwebsite" placeholder="https://yourbusiness.com">
+        </div>
+        <div class="form-group">
+          <label>Working Hours <span class="b-opt">Optional</span></label>
+          <input type="text" id="phours" placeholder="Mon–Sat, 9 AM – 7 PM">
+        </div>
+      </div>
+      <div class="g2">
+        <div class="form-group">
+          <label>Facebook Page <span class="b-opt">Optional</span></label>
+          <input type="url" id="pfacebook" placeholder="https://facebook.com/yourpage">
+        </div>
+        <div class="form-group">
+          <label>Instagram <span class="b-opt">Optional</span></label>
+          <input type="url" id="pinstagram" placeholder="https://instagram.com/yourhandle">
+        </div>
+      </div>
+    </div>
+
+  </form>
+</div>
+
+<!-- Sticky Footer -->
+<div class="sticky-foot">
+  <div class="sticky-foot-info">
+    <strong id="footName">Your Business</strong>
+    <span id="footProg">Loading…</span>
+  </div>
+  <div class="foot-actions">
+    <button class="btn btn-secondary" type="button" onclick="location.href='dashboard.html'">Cancel</button>
+    <button class="btn btn-primary" id="saveBtn" type="button" onclick="saveProfile(event)" disabled>
+      Save &amp; Analyse Business
+    </button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ✅ Correct path: seller/ → ../api/
+const API = '../api/';
+
+
+
+// ── Theme ────────────────────────────────────────────────────
+const savedTheme = localStorage.getItem('theme') || 'light';
+document.documentElement.setAttribute('data-theme', savedTheme);
+document.getElementById('themeBtn').textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+function toggleTheme() {
+  const cur  = document.documentElement.getAttribute('data-theme');
+  const next = cur === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('theme', next);
+  document.getElementById('themeBtn').textContent = next === 'dark' ? '☀️' : '🌙';
+}
+
+// ── Load seller identity ─────────────────────────────────────
+let seller  = JSON.parse(localStorage.getItem('seller')  || null);
+let details = JSON.parse(localStorage.getItem('sellerDetails') || null);
+
+// Normalize key — registration may store seller_id instead of id
+if (seller && seller.id == null && seller.seller_id != null) {
+  seller.id = seller.seller_id;
+}
+
+if (!seller?.id) location.href = 'register.html';
+
+// ── Toast ────────────────────────────────────────────────────
+function toast(msg, dur = 3500, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className   = 'toast' + (type ? ` ${type}` : '');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), dur);
+}
+
+// ── GST Validator ────────────────────────────────────────────
+function checkGST(v) {
+  const ok = document.getElementById('gstOk');
+  if (/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/.test(v)) {
+    ok.style.display = 'flex';
+    document.getElementById('gstState').textContent = v.substring(0, 2);
+  } else {
+    ok.style.display = 'none';
+  }
+}
+
+// ── Progress ─────────────────────────────────────────────────
+const TRACKED = [
+  'pname','pbusinesstype','pcategory','pproducts','pdesc',
+  'paddress','pcity','pstate','ppincode','pdeliveryradius',
+  'pgst','pturnover','pemployees','pcerts',
+  'pphone','pwhatsapp','pwebsite','phours','pfacebook','pinstagram'
+];
+
+function updateProgress() {
+  const filled = TRACKED.filter(id => {
+    const el = document.getElementById(id);
+    return el && el.value.trim() !== '';
+  }).length;
+  const pct = Math.round((filled / TRACKED.length) * 100);
+  document.getElementById('progBar').style.width = pct + '%';
+  document.getElementById('progLabel').textContent = `Profile ${pct}% complete · ${filled}/${TRACKED.length} fields`;
+  document.getElementById('footProg').textContent  = `${pct}% complete`;
+}
+
+TRACKED.forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('input', updateProgress);
+});
+
+// ── Set field ────────────────────────────────────────────────
+function setField(id, value) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.value = value ?? '';
+}
+
+// ── Pre-fill form ────────────────────────────────────────────
+function prefillForm(s, d) {
+  setField('pname',          s.name);
+  setField('pcategory',      s.category);
+  setField('pcity',          s.city);
+  setField('pstate',         s.state);
+  setField('pwebsite',       s.website);
+  setField('pphone',         s.contact);
+  if (!d) { updateProgress(); return; }
+  setField('pbusinesstype',  d.business_type);
+  setField('pyear',          d.year_established);
+  setField('pproducts',      d.products_offered);
+  setField('pdesc',          d.business_desc);
+  setField('paddress',       d.address);
+  setField('ppincode',       d.pincode);
+  setField('pdeliveryradius',d.delivery_radius);
+  setField('pgst',           d.gst_number);
+  setField('pturnover',      d.annual_turnover);
+  setField('pemployees',     d.employees);
+  setField('pcerts',         d.certifications);
+  setField('pwhatsapp',      d.whatsapp);
+  setField('phours',         d.working_hours);
+  setField('pfacebook',      d.facebook_url);
+  setField('pinstagram',     d.instagram_url);
+  if (d.gst_number) checkGST(d.gst_number);
+  document.getElementById('footName').textContent = s.name || 'Your Business';
+  updateProgress();
+}
+
+// ── Load from DB ─────────────────────────────────────────────
+async function loadFromDB() {
+  try {
+    const res  = await fetch(`${API}seller-load.php?seller_id=${seller.id}`);
+    const text = await res.text();
+    let data;
+    try { data = JSON.parse(text); }
+    catch { throw new Error('Invalid response: ' + text.substring(0, 100)); }
+    if (!data.success) throw new Error(data.error);
+
+    const freshSeller = { ...seller, ...data.seller };
+    if (freshSeller.id == null && freshSeller.seller_id != null)
+      freshSeller.id = freshSeller.seller_id;
+
+    seller  = freshSeller;
+    details = data.details || {};
+
+    localStorage.setItem('seller',        JSON.stringify(seller));
+    localStorage.setItem('sellerDetails', JSON.stringify(details));
+    prefillForm(seller, details);
+
+  } catch (err) {
+    console.warn('DB load failed, using localStorage:', err.message);
+    prefillForm(seller, details || {});
+    toast('Could not load latest data from server.', 3000);
+  } finally {
+    const overlay = document.getElementById('loadOverlay');
+    overlay.classList.add('hide');
+    setTimeout(() => overlay.style.display = 'none', 400);
+    document.getElementById('saveBtn').disabled = false;
+  }
+}
+
+loadFromDB();
+
+// ── Save ─────────────────────────────────────────────────────
+async function saveProfile(e) {
+  if (e) e.preventDefault();
+
+  const products = document.getElementById('pproducts').value.trim();
+  const city     = document.getElementById('pcity').value.trim();
+  const category = document.getElementById('pcategory').value;
+
+  if (!products) { toast('Products/Services field is required', 3000, 'error'); document.getElementById('pproducts').focus(); return; }
+  if (!city)     { toast('City is required', 3000, 'error'); document.getElementById('pcity').focus(); return; }
+  if (!category) { toast('Please select a category', 3000, 'error'); document.getElementById('pcategory').focus(); return; }
+
+  const btn = document.getElementById('saveBtn');
+  btn.disabled    = true;
+  btn.textContent = 'Saving…';
+
+  const payload = {
+    seller_id:        seller.id,
+    name:             document.getElementById('pname').value.trim()       || seller.name,
+    category,
+    city,
+    state:            document.getElementById('pstate').value.trim(),
+    website:          document.getElementById('pwebsite').value.trim(),
+    contact:          document.getElementById('pphone').value.trim(),
+    business_type:    document.getElementById('pbusinesstype').value,
+    year_established: document.getElementById('pyear').value,
+    products_offered: products,
+    business_desc:    document.getElementById('pdesc').value.trim(),
+    address:          document.getElementById('paddress').value.trim(),
+    pincode:          document.getElementById('ppincode').value.trim(),
+    delivery_radius:  document.getElementById('pdeliveryradius').value,
+    gst_number:       document.getElementById('pgst').value.trim(),
+    annual_turnover:  document.getElementById('pturnover').value,
+    employees:        document.getElementById('pemployees').value,
+    certifications:   document.getElementById('pcerts').value.trim(),
+    whatsapp:         document.getElementById('pwhatsapp').value.trim(),
+    working_hours:    document.getElementById('phours').value.trim(),
+    facebook_url:     document.getElementById('pfacebook').value.trim(),
+    instagram_url:    document.getElementById('pinstagram').value.trim(),
+  };
+
+  try {
+    const res  = await fetch(`${API}seller-save-details.php`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(payload)
+    });
+
+    const text = await res.text();
+    if (!res.ok) throw new Error(`HTTP ${res.status}: ${text.substring(0, 100)}`);
+
+    let data;
+    try { data = JSON.parse(text); }
+    catch { throw new Error('Non-JSON response: ' + text.substring(0, 150)); }
+    if (!data.success) throw new Error(data.error);
+
+    const confirmedSeller = { ...seller, ...data.seller };
+    if (confirmedSeller.id == null && confirmedSeller.seller_id != null)
+      confirmedSeller.id = confirmedSeller.seller_id;
+
+    localStorage.setItem('seller',        JSON.stringify(confirmedSeller));
+    localStorage.setItem('sellerDetails', JSON.stringify(data.details || payload));
+    localStorage.removeItem('lastReport');
+
+    toast('Profile saved successfully!', 3000, 'success');
+    btn.textContent = 'Saved! ✓';
+    setTimeout(() => location.href = 'dashboard.html?analyse=1', 900);
+
+  } catch (err) {
+    const optimisticSeller = {
+      ...seller,
+      name: payload.name, category: payload.category,
+      city: payload.city, state: payload.state,
+      website: payload.website, contact: payload.phone,
+    };
+    localStorage.setItem('seller',        JSON.stringify(optimisticSeller));
+    localStorage.setItem('sellerDetails', JSON.stringify(payload));
+    localStorage.removeItem('lastReport');
+    toast(`Error: ${err.message} — saved locally`, 5000, 'error');
+    btn.disabled    = false;
+    btn.textContent = 'Save & Analyse Business';
+  }
+}
+</script>
+</body>
+</html>

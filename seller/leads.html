@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Buyer Leads — BizBoost</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#000;--bg1:#0a0a0a;--bg2:#111;--bg3:#1a1a1a;--bg4:#242424;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.04);
+  --text:#f5f5f7;--text2:rgba(245,245,247,0.58);--text3:rgba(245,245,247,0.3);
+  --blue:#2997ff;--blue-dim:rgba(41,151,255,0.12);--blue-border:rgba(41,151,255,0.25);
+  --amber:#ff9f0a;--amber-dim:rgba(255,159,10,0.1);--amber-border:rgba(255,159,10,0.22);
+  --red:#ff453a;--nav-h:56px;
+  --r:16px;--r-sm:10px;--ease:cubic-bezier(.22,1,.36,1);
+}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+body{font-family:'Plus Jakarta Sans',-apple-system,sans-serif;background:var(--bg);
+  color:var(--text);min-height:100vh;
+  background-image:radial-gradient(ellipse 90% 45% at 50% -8%,rgba(41,151,255,0.07),transparent 55%)}
+
+/* SCROLL PROGRESS */
+#prog{position:fixed;top:0;left:0;height:1.5px;width:0%;z-index:9999;
+  background:linear-gradient(90deg,var(--blue),#8a6fff,var(--blue));
+  background-size:200%;animation:bgs 2s linear infinite;transition:width .08s linear}
+@keyframes bgs{0%{background-position:100%}100%{background-position:-100%}}
+
+/* NAV */
+.nav{position:sticky;top:0;z-index:200;height:var(--nav-h);
+  display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 24px;
+  background:rgba(0,0,0,0.8);backdrop-filter:saturate(180%) blur(28px);
+  -webkit-backdrop-filter:saturate(180%) blur(28px);border-bottom:1px solid var(--border)}
+.logo{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:var(--text);
+  text-decoration:none;letter-spacing:-0.03em;display:flex;align-items:center;gap:7px;flex-shrink:0}
+.logo em{color:var(--blue);font-style:normal}
+.logo-dot{width:6px;height:6px;border-radius:50%;background:var(--blue);
+  box-shadow:0 0 10px var(--blue);animation:pdot 2.5s ease-in-out infinite}
+@keyframes pdot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.6)}}
+
+.nav-tabs{display:flex;gap:1px;background:var(--bg2);border-radius:10px;padding:3px}
+.ntab{font-size:13px;font-weight:500;padding:5px 13px;border-radius:8px;text-decoration:none;
+  color:var(--text2);transition:all .18s var(--ease);white-space:nowrap}
+.ntab:hover{color:var(--text);background:rgba(255,255,255,0.06)}
+.ntab.on{color:var(--text);background:var(--bg3);box-shadow:0 1px 4px rgba(0,0,0,.5)}
+
+.nav-r{display:flex;gap:8px;align-items:center}
+.nbtn{font-size:13px;font-weight:500;padding:6px 14px;border-radius:980px;
+  border:1px solid var(--border);background:rgba(255,255,255,0.05);color:var(--text2);
+  cursor:pointer;text-decoration:none;transition:all .18s var(--ease);
+  font-family:inherit;display:flex;align-items:center;gap:6px}
+.nbtn:hover{background:rgba(255,255,255,0.1);color:var(--text);border-color:rgba(255,255,255,.14)}
+.nbtn.blue{background:var(--blue);color:#fff;border-color:transparent;
+  box-shadow:0 2px 16px rgba(41,151,255,.35)}
+.nbtn.blue:hover{background:#147ce5;box-shadow:0 4px 24px rgba(41,151,255,.5);transform:translateY(-1px)}
+.nbtn.blue:active{transform:scale(.97)}
+.nbtn:disabled{opacity:.4;cursor:not-allowed!important;transform:none!important}
+
+/* burger */
+.burger{display:none;flex-direction:column;gap:5px;cursor:pointer;
+  padding:6px;border:none;background:none;border-radius:8px;transition:background .2s}
+.burger:hover{background:rgba(255,255,255,.07)}
+.burger span{display:block;width:20px;height:1.5px;background:var(--text2);
+  transition:all .3s var(--ease);transform-origin:center}
+.burger.open span:nth-child(1){transform:translateY(6.5px) rotate(45deg)}
+.burger.open span:nth-child(2){opacity:0;transform:scaleX(0)}
+.burger.open span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg)}
+
+/* MOBILE DRAWER */
+.mob-drawer{position:fixed;inset:0;z-index:190;pointer-events:none}
+.mob-back{position:absolute;inset:0;background:rgba(0,0,0,.65);
+  backdrop-filter:blur(6px);opacity:0;transition:opacity .3s;pointer-events:none}
+.mob-panel{position:absolute;top:var(--nav-h);left:0;right:0;
+  background:rgba(8,8,8,.98);border-bottom:1px solid var(--border);
+  padding:14px 18px 22px;transform:translateY(-10px);opacity:0;
+  transition:all .3s var(--ease);pointer-events:none}
+.mob-drawer.open .mob-back{opacity:1;pointer-events:all}
+.mob-drawer.open .mob-panel{transform:translateY(0);opacity:1;pointer-events:all}
+.mob-links{display:flex;flex-direction:column;gap:3px;margin-bottom:14px}
+.mob-link{font-size:15px;font-weight:500;padding:11px 14px;border-radius:10px;
+  text-decoration:none;color:var(--text2);transition:all .18s;display:block}
+.mob-link:hover,.mob-link.on{color:var(--text);background:rgba(255,255,255,.07)}
+
+/* MAIN */
+.main{max-width:1060px;margin:0 auto;padding:36px 24px 100px}
+
+/* PAGE HEADER */
+.ph{margin-bottom:32px;animation:fadeUp .45s var(--ease) both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.ph-top{display:flex;align-items:flex-start;justify-content:space-between;
+  flex-wrap:wrap;gap:16px;margin-bottom:4px}
+.ph-eyebrow{font-size:11px;font-weight:700;color:var(--blue);letter-spacing:.1em;
+  text-transform:uppercase;margin-bottom:8px}
+.ph h1{font-family:'Syne',sans-serif;font-size:26px;font-weight:700;
+  letter-spacing:-0.04em;line-height:1.15}
+.ph-sub{color:var(--text2);font-size:14px;margin-top:5px}
+
+/* STATS STRIP */
+.stats-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;
+  margin-bottom:24px;animation:fadeUp .5s var(--ease) .06s both}
+.stat{background:var(--bg1);border:1px solid var(--border);border-radius:var(--r);
+  padding:16px 18px;position:relative;overflow:hidden;
+  transition:all .22s var(--ease);cursor:default}
+.stat::after{content:'';position:absolute;inset:0;opacity:0;
+  background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(41,151,255,.08),transparent 65%);
+  transition:opacity .3s;pointer-events:none}
+.stat:hover::after{opacity:1}
+.stat:hover{border-color:rgba(255,255,255,.12);transform:translateY(-1px)}
+.stat-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;
+  justify-content:center;margin-bottom:10px;flex-shrink:0}
+.stat-icon.blue{background:rgba(41,151,255,.14)}
+.stat-icon.amber{background:rgba(255,159,10,.12)}
+.stat-icon.purple{background:rgba(141,100,242,.14)}
+.stat-icon.slate{background:rgba(255,255,255,.07)}
+.stat-val{font-family:'Syne',sans-serif;font-size:26px;font-weight:700;
+  letter-spacing:-0.05em;line-height:1;margin-bottom:4px;transition:color .3s}
+.stat-lbl{font-size:11px;color:var(--text3);font-weight:600;
+  letter-spacing:.05em;text-transform:uppercase}
+.stat.active-filter .stat-val{color:var(--blue)}
+.stat.active-filter{border-color:var(--blue-border);background:var(--blue-dim)}
+
+/* TOOLBAR */
+.toolbar{display:flex;gap:10px;align-items:center;margin-bottom:20px;
+  flex-wrap:wrap;animation:fadeUp .5s var(--ease) .1s both}
+.search-wrap{position:relative;flex:1;min-width:200px;max-width:340px}
+.search-wrap svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);
+  pointer-events:none;opacity:.4}
+.search-input{width:100%;padding:9px 14px 9px 36px;
+  background:var(--bg1);border:1px solid var(--border);
+  border-radius:980px;color:var(--text);font-size:13px;font-family:inherit;
+  outline:none;transition:all .2s}
+.search-input::placeholder{color:var(--text3)}
+.search-input:focus{border-color:var(--blue-border);background:rgba(41,151,255,.04);
+  box-shadow:0 0 0 3px rgba(41,151,255,.1)}
+
+.filter-row{display:flex;gap:6px;flex-wrap:wrap}
+.fchip{font-size:12px;font-weight:600;padding:6px 14px;border-radius:980px;
+  border:1px solid var(--border);background:transparent;color:var(--text3);
+  cursor:pointer;transition:all .18s var(--ease);font-family:inherit;
+  display:flex;align-items:center;gap:5px;letter-spacing:.01em}
+.fchip:hover{border-color:rgba(255,255,255,.18);color:var(--text)}
+.fchip.on{background:var(--blue);color:#fff;border-color:transparent;
+  box-shadow:0 2px 12px rgba(41,151,255,.35)}
+.fchip .chip-count{font-size:10px;opacity:.7;font-weight:700;
+  background:rgba(255,255,255,.18);padding:1px 5px;border-radius:980px}
+
+.sort-wrap{display:flex;align-items:center;gap:6px;margin-left:auto}
+.sort-label{font-size:12px;color:var(--text3);white-space:nowrap}
+.sort-select{background:var(--bg1);border:1px solid var(--border);
+  color:var(--text2);font-size:12px;font-family:inherit;
+  padding:6px 10px;border-radius:8px;outline:none;cursor:pointer;
+  transition:border-color .2s}
+.sort-select:focus{border-color:var(--blue-border)}
+.sort-select option{background:var(--bg2)}
+
+/* RESULTS COUNT */
+.results-meta{font-size:12px;color:var(--text3);margin-bottom:16px;
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.results-meta strong{color:var(--text2)}
+.clear-btn{font-size:12px;color:var(--blue);cursor:pointer;
+  background:none;border:none;font-family:inherit;transition:opacity .2s}
+.clear-btn:hover{opacity:.7}
+
+/* LEAD GRID */
+.lead-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+
+/* LEAD CARD */
+.lc{background:var(--bg1);border:1px solid var(--border);border-radius:var(--r);
+  overflow:hidden;transition:all .22s var(--ease);
+  animation:cardIn .4s var(--ease) both;position:relative}
+@keyframes cardIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.lc:hover{border-color:rgba(255,255,255,.12);transform:translateY(-2px);
+  box-shadow:0 12px 40px rgba(0,0,0,.45)}
+.lc-inner{padding:18px 20px}
+
+/* accent line on left */
+.lc::before{content:'';position:absolute;left:0;top:16px;bottom:16px;
+  width:2px;border-radius:0 2px 2px 0;background:var(--blue);
+  opacity:0;transition:opacity .25s}
+.lc:hover::before{opacity:.6}
+.lc.is-new::before{opacity:.5;background:var(--blue)}
+
+/* card header */
+.lc-head{display:flex;align-items:flex-start;justify-content:space-between;
+  gap:10px;margin-bottom:14px}
+.lc-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;
+  letter-spacing:-0.02em;line-height:1.25;flex:1;min-width:0}
+.lc-title .highlight{background:rgba(41,151,255,.18);
+  border-radius:3px;padding:0 2px;color:var(--blue)}
+
+.badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:980px;
+  flex-shrink:0;letter-spacing:.03em}
+.badge-new{background:var(--blue-dim);border:1px solid var(--blue-border);color:var(--blue)}
+.badge-active{background:var(--amber-dim);border:1px solid var(--amber-border);color:var(--amber)}
+
+/* data rows */
+.lc-rows{display:flex;flex-direction:column;gap:0}
+.lrow{display:flex;align-items:center;gap:10px;padding:7px 0;
+  border-bottom:1px solid var(--border2);font-size:13px}
+.lrow:last-child{border-bottom:none}
+.lrow-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;
+  justify-content:center;flex-shrink:0;background:var(--bg3)}
+.lrow-icon svg{opacity:.55}
+.lrow-val{color:var(--text2);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lrow-val.strong{color:var(--text);font-weight:600}
+.lrow-val.contact{color:var(--blue);font-weight:600;font-size:14px}
+.lrow-val.muted{color:var(--text3);font-style:italic}
+
+/* expand toggle */
+.lc-expand{display:flex;align-items:center;justify-content:center;gap:6px;
+  padding:10px;border-top:1px solid var(--border2);cursor:pointer;
+  font-size:12px;font-weight:600;color:var(--text3);
+  background:none;border-left:none;border-right:none;border-bottom:none;
+  width:100%;font-family:inherit;transition:all .18s}
+.lc-expand:hover{color:var(--blue);background:rgba(41,151,255,.04)}
+.lc-expand svg{transition:transform .25s var(--ease)}
+.lc-expand.open svg{transform:rotate(180deg)}
+
+/* revealed contact panel */
+.lc-contact{border-top:1px solid var(--border2);padding:14px 20px;
+  display:none;animation:slideDown .25s var(--ease)}
+@keyframes slideDown{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.lc-contact.visible{display:block}
+.contact-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.contact-btn{display:flex;align-items:center;justify-content:center;gap:7px;
+  padding:10px;border-radius:10px;font-size:13px;font-weight:600;
+  cursor:pointer;border:none;font-family:inherit;transition:all .2s var(--ease);
+  text-decoration:none}
+.contact-btn.call{background:var(--blue);color:#fff;
+  box-shadow:0 3px 14px rgba(41,151,255,.35)}
+.contact-btn.call:hover{background:#147ce5;transform:translateY(-1px);
+  box-shadow:0 5px 20px rgba(41,151,255,.5)}
+.contact-btn.wa{background:rgba(37,211,102,.12);color:#25d366;
+  border:1px solid rgba(37,211,102,.22)}
+.contact-btn.wa:hover{background:rgba(37,211,102,.2)}
+.contact-btn.copy{background:var(--bg3);color:var(--text2);
+  border:1px solid var(--border)}
+.contact-btn.copy:hover{background:var(--bg4);color:var(--text)}
+.contact-btn.copy.copied{background:rgba(41,151,255,.12);color:var(--blue);
+  border-color:var(--blue-border)}
+.no-contact{text-align:center;padding:10px;font-size:13px;color:var(--text3)}
+
+/* LOADER */
+.loader-card{background:var(--bg1);border:1px solid var(--border);border-radius:var(--r);
+  padding:56px 24px;text-align:center;animation:fadeUp .4s var(--ease) both}
+.spin-wrap{width:48px;height:48px;margin:0 auto 20px;position:relative}
+.spin-o{position:absolute;inset:0;border-radius:50%;border:1.5px solid rgba(41,151,255,.15);
+  border-top-color:var(--blue);animation:spin .9s linear infinite}
+.spin-i{position:absolute;top:9px;left:9px;width:30px;height:30px;border-radius:50%;
+  border:1.5px solid rgba(141,100,242,.15);border-bottom-color:#8a6fff;
+  animation:spin .6s linear infinite reverse}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loader-card p{font-size:14px;font-weight:500;color:var(--text2)}
+.loader-card small{font-size:12px;color:var(--text3);margin-top:5px;display:block}
+
+/* EMPTY */
+.empty-card{background:var(--bg1);border:1px solid var(--border);border-radius:var(--r);
+  padding:56px 24px;text-align:center;display:none}
+.empty-icon{width:52px;height:52px;border-radius:50%;
+  background:rgba(41,151,255,.08);border:1px solid var(--blue-border);
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 18px}
+.empty-card h3{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;
+  letter-spacing:-0.02em;margin-bottom:8px}
+.empty-card p{font-size:13px;color:var(--text2);line-height:1.65;
+  max-width:340px;margin:0 auto 20px}
+
+/* HOW IT WORKS */
+.hw{background:var(--bg1);border:1px solid var(--border);border-radius:var(--r);
+  padding:24px 28px;margin-top:32px;animation:fadeUp .55s var(--ease) .2s both}
+.hw-head{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;
+  letter-spacing:-0.02em;margin-bottom:20px;display:flex;align-items:center;gap:8px}
+.hw-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
+  background:var(--border2);border-radius:10px;overflow:hidden}
+.hw-item{background:var(--bg1);padding:20px;transition:background .2s}
+.hw-item:hover{background:var(--bg2)}
+.hw-num{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:var(--blue);
+  letter-spacing:.08em;margin-bottom:10px}
+.hw-step-icon{width:32px;height:32px;border-radius:9px;
+  background:rgba(41,151,255,.1);border:1px solid var(--blue-border);
+  display:flex;align-items:center;justify-content:center;margin-bottom:12px}
+.hw-title{font-size:13px;font-weight:700;margin-bottom:5px;letter-spacing:-0.01em}
+.hw-text{font-size:12px;color:var(--text3);line-height:1.6}
+
+/* TOAST */
+.toast{position:fixed;bottom:28px;left:50%;
+  transform:translateX(-50%) translateY(14px);
+  background:rgba(18,18,20,.97);border:1px solid rgba(255,255,255,.1);
+  color:var(--text);font-size:13px;font-weight:500;
+  padding:11px 22px;border-radius:980px;
+  opacity:0;pointer-events:none;transition:all .3s var(--ease);z-index:999;
+  backdrop-filter:blur(20px);box-shadow:0 8px 32px rgba(0,0,0,.5);white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.ok{border-color:rgba(41,151,255,.35)}
+.toast.err{border-color:rgba(255,69,58,.35)}
+
+/* RIPPLE */
+.rpl{position:absolute;border-radius:50%;background:rgba(255,255,255,.1);
+  transform:scale(0);animation:rplAnim .5s linear forwards;pointer-events:none}
+@keyframes rplAnim{to{transform:scale(4);opacity:0}}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .nav-tabs{display:none}
+  .burger{display:flex}
+  .sort-wrap{margin-left:0}
+  .stats-strip{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:600px){
+  .nav{padding:0 16px}
+  .main{padding:24px 16px 80px}
+  .stats-strip{gap:8px}
+  .lead-grid{grid-template-columns:1fr}
+  .toolbar{gap:8px}
+  .search-wrap{max-width:100%;min-width:100%}
+  .hw-grid{grid-template-columns:1fr}
+  .hw{padding:18px}
+  .contact-actions{grid-template-columns:1fr}
+  .toast{max-width:calc(100vw - 32px);white-space:normal;text-align:center;bottom:20px}
+  .ph h1{font-size:22px}
+  .ph-top{flex-direction:column;gap:10px}
+}
+@media(max-width:400px){
+  .stats-strip{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+<div id="prog"></div>
+
+<!-- MOBILE DRAWER -->
+<div class="mob-drawer" id="mobDrawer">
+  <div class="mob-back" onclick="closeMob()"></div>
+  <div class="mob-panel">
+    <div class="mob-links">
+      <a href="dashboard.html" class="mob-link">Dashboard</a>
+      <a href="competitors.html" class="mob-link">Competitors</a>
+      <a href="keywords.html" class="mob-link">Keywords</a>
+      <a href="leads.html" class="mob-link on">Buyer Leads</a>
+      <a href="onboard.html" class="mob-link">Edit Profile</a>
+    </div>
+    <button class="nbtn blue" style="width:100%;justify-content:center;padding:10px;border-radius:10px"
+      onclick="closeMob();loadLeads(true)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6"/><path d="M2.5 22v-6h6"/><path d="M22 12.5A10 10 0 0 1 3.5 19"/><path d="M2 11.5A10 10 0 0 1 20.5 5"/></svg>
+      Refresh Leads
+    </button>
+  </div>
+</div>
+
+<nav class="nav">
+  <a href="../index.html" class="logo">
+    <div class="logo-dot"></div>Biz<em>Boost</em>
+  </a>
+  <div class="nav-tabs">
+    <a href="dashboard.html" class="ntab">Overview</a>
+    <a href="competitors.html" class="ntab">Competitors</a>
+    <a href="keywords.html" class="ntab">Keywords</a>
+    <a href="leads.html" class="ntab on">Buyer Leads</a>
+  </div>
+  <div class="nav-r">
+    <button class="nbtn blue" id="refreshBtn" onclick="loadLeads(true)">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6"/><path d="M2.5 22v-6h6"/><path d="M22 12.5A10 10 0 0 1 3.5 19"/><path d="M2 11.5A10 10 0 0 1 20.5 5"/></svg>
+      Refresh
+    </button>
+    <button class="burger" id="burgerBtn" onclick="toggleMob()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<div class="main">
+
+  <!-- PAGE HEADER -->
+  <div class="ph">
+    <div class="ph-top">
+      <div>
+        <div class="ph-eyebrow">Buyer Intelligence</div>
+        <h1>Buyer Leads</h1>
+        <p class="ph-sub" id="subTitle">Finding buyers searching for your products…</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATS STRIP -->
+  <div class="stats-strip" id="statsStrip" style="display:none">
+    <div class="stat" id="statTotal" onclick="setFilter('all',this)" style="cursor:pointer" tabindex="0">
+      <div class="stat-icon blue">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2997ff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
+      </div>
+      <div class="stat-val" id="stTotal">0</div>
+      <div class="stat-lbl">Total Leads</div>
+    </div>
+    <div class="stat" id="statPhone" onclick="setFilter('phone',this)" style="cursor:pointer" tabindex="0">
+      <div class="stat-icon amber">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ff9f0a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.13.96.37 1.9.7 2.8a2 2 0 0 1-.45 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.44c.9.33 1.84.57 2.8.7A2 2 0 0 1 22 16.9z"/></svg>
+      </div>
+      <div class="stat-val" id="stPhone">0</div>
+      <div class="stat-lbl">Has Contact</div>
+    </div>
+    <div class="stat" id="statBudget" onclick="setFilter('budget',this)" style="cursor:pointer" tabindex="0">
+      <div class="stat-icon purple">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8a6fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      </div>
+      <div class="stat-val" id="stBudget">0</div>
+      <div class="stat-lbl">Has Budget</div>
+    </div>
+    <div class="stat" id="statNew" onclick="setFilter('new',this)" style="cursor:pointer" tabindex="0">
+      <div class="stat-icon slate">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(245,245,247,0.55)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <div class="stat-val" id="stNew">0</div>
+      <div class="stat-lbl">This Week</div>
+    </div>
+  </div>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar" id="toolbar" style="display:none">
+    <div class="search-wrap">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" class="search-input" id="searchBox" placeholder="Search product, city, buyer…">
+    </div>
+    <div class="filter-row" id="filterRow">
+      <button class="fchip on" data-f="all">All <span class="chip-count" id="fc-all">0</span></button>
+      <button class="fchip" data-f="phone">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.13.96.37 1.9.7 2.8a2 2 0 0 1-.45 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.44c.9.33 1.84.57 2.8.7A2 2 0 0 1 22 16.9z"/></svg>
+        Contactable <span class="chip-count" id="fc-phone">0</span>
+      </button>
+      <button class="fchip" data-f="budget">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Has Budget <span class="chip-count" id="fc-budget">0</span>
+      </button>
+      <button class="fchip" data-f="new">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        New <span class="chip-count" id="fc-new">0</span>
+      </button>
+    </div>
+    <div class="sort-wrap">
+      <span class="sort-label">Sort</span>
+      <select class="sort-select" id="sortSelect">
+        <option value="newest">Newest first</option>
+        <option value="oldest">Oldest first</option>
+        <option value="budget">Highest budget</option>
+        <option value="alpha">A–Z</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- RESULTS META -->
+  <div class="results-meta" id="resultsMeta" style="display:none">
+    <span><strong id="resultsCount">0</strong> leads shown</span>
+    <button class="clear-btn" id="clearFilters" onclick="clearAll()" style="display:none">
+      Clear filters ×
+    </button>
+  </div>
+
+  <!-- LOADER -->
+  <div class="loader-card" id="loaderBox">
+    <div class="spin-wrap"><div class="spin-o"></div><div class="spin-i"></div></div>
+    <p>Finding buyer leads…</p>
+    <small>Matching buyers in your city to your products</small>
+  </div>
+
+  <!-- LEAD GRID -->
+  <div id="leadGrid" class="lead-grid" style="display:none"></div>
+
+  <!-- EMPTY STATE -->
+  <div class="empty-card" id="emptyState">
+    <div class="empty-icon">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2997ff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+    </div>
+    <h3 id="emptyTitle">No leads matched yet</h3>
+    <p id="emptyText">Leads appear when buyers in your city search for your products. Try broadening your search or complete your profile for better matches.</p>
+    <a href="onboard.html" class="nbtn blue" style="display:inline-flex;margin:0 auto">Complete Profile →</a>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div class="hw">
+    <div class="hw-head">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      How Buyer Leads Work
+    </div>
+    <div class="hw-grid">
+      <div class="hw-item">
+        <div class="hw-num">01</div>
+        <div class="hw-step-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2997ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </div>
+        <div class="hw-title">Buyer Posts a Need</div>
+        <div class="hw-text">A buyer in your city posts that they need a specific product or service with their requirements.</div>
+      </div>
+      <div class="hw-item">
+        <div class="hw-num">02</div>
+        <div class="hw-step-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2997ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <div class="hw-title">AI Matches to Your Products</div>
+        <div class="hw-text">Our AI checks if the buyer's request matches your listed products, category, and location.</div>
+      </div>
+      <div class="hw-item">
+        <div class="hw-num">03</div>
+        <div class="hw-step-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2997ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.13.96.37 1.9.7 2.8a2 2 0 0 1-.45 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.44c.9.33 1.84.57 2.8.7A2 2 0 0 1 22 16.9z"/></svg>
+        </div>
+        <div class="hw-title">You Contact Them Directly</div>
+        <div class="hw-text">Call or message matched buyers directly from this page to close the deal fast.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- SVG ICON TEMPLATES (reused in JS) -->
+<template id="icon-pin">
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+</template>
+<template id="icon-money">
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+</template>
+<template id="icon-box">
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+</template>
+<template id="icon-user">
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+</template>
+<template id="icon-phone">
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.13.96.37 1.9.7 2.8a2 2 0 0 1-.45 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.44c.9.33 1.84.57 2.8.7A2 2 0 0 1 22 16.9z"/></svg>
+</template>
+<template id="icon-clock">
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+</template>
+<template id="icon-chevron">
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+</template>
+
+<script>
+const API="/api";
+const seller=JSON.parse(localStorage.getItem("seller")||"null");
+if(!seller?.id)location.href="register.html";
+
+let allLeads=[],activeFilter="all",activeSearch="";
+
+/* SCROLL PROGRESS */
+window.addEventListener("scroll",()=>{
+  const s=window.scrollY,h=document.documentElement.scrollHeight-innerHeight;
+  if(h>0)document.getElementById("prog").style.width=(s/h*100)+"%";
+},{passive:true});
+
+/* STAT CARD GLOW */
+document.querySelectorAll(".stat").forEach(el=>{
+  el.addEventListener("mousemove",e=>{
+    const r=el.getBoundingClientRect();
+    el.style.setProperty("--mx",((e.clientX-r.left)/r.width*100)+"%");
+    el.style.setProperty("--my",((e.clientY-r.top)/r.height*100)+"%");
+  });
+});
+
+/* MOBILE NAV */
+function toggleMob(){
+  const d=document.getElementById("mobDrawer"),b=document.getElementById("burgerBtn");
+  d.classList.toggle("open");b.classList.toggle("open");
+  document.body.style.overflow=d.classList.contains("open")?"hidden":"";
+}
+function closeMob(){
+  document.getElementById("mobDrawer").classList.remove("open");
+  document.getElementById("burgerBtn").classList.remove("open");
+  document.body.style.overflow="";
+}
+
+/* TOAST */
+let _tid;
+function toast(msg,type="",dur=3200){
+  const t=document.getElementById("toast");
+  t.textContent=msg;t.className="toast show"+(type?" "+type:"");
+  clearTimeout(_tid);_tid=setTimeout(()=>t.classList.remove("show"),dur);
+}
+
+/* COUNTER ANIM */
+function animCount(el,n){
+  if(!el)return;n=parseInt(n)||0;
+  if(!n){el.textContent="0";return}
+  let c=0;const steps=30,inc=n/steps;
+  const t=setInterval(()=>{c=Math.min(c+inc,n);el.textContent=Math.round(c);if(c>=n)clearInterval(t)},20);
+}
+
+function esc(s){return(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+function icon(id){const t=document.getElementById("icon-"+id);return t?t.innerHTML:""}
+const WEEK=7*24*3600*1000;
+function isNew(l){return(Date.now()-new Date(l.created_at||0).getTime())<WEEK}
+
+/* HIGHLIGHT SEARCH TERM */
+function highlight(text,q){
+  if(!q)return esc(text);
+  const re=new RegExp("("+q.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+")","gi");
+  return esc(text).replace(re,'<span class="highlight">$1</span>');
+}
+
+/* LOAD LEADS */
+async function loadLeads(force=false){
+  const btn=document.getElementById("refreshBtn");
+  if(btn){btn.disabled=true}
+  document.getElementById("loaderBox").style.display="block";
+  document.getElementById("leadGrid").style.display="none";
+  document.getElementById("emptyState").style.display="none";
+  document.getElementById("statsStrip").style.display="none";
+  document.getElementById("toolbar").style.display="none";
+  document.getElementById("resultsMeta").style.display="none";
+  try{
+    const d=JSON.parse(localStorage.getItem("sellerDetails")||"{}");
+    const url=`${API}/get_leads.php?seller_id=${seller.id}`
+      +`&category=${encodeURIComponent(seller.category||"")}`
+      +`&city=${encodeURIComponent(seller.city||"")}`
+      +`&products=${encodeURIComponent(d.products_offered||"")}`
+      +(force?"&refresh=1":"");
+    const res=await fetch(url);
+    const text=await res.text();
+    let data;try{data=JSON.parse(text)}catch(e){throw new Error("Non-JSON: "+text.substring(0,100))}
+    document.getElementById("loaderBox").style.display="none";
+    if(!data.success||!data.leads?.length){
+      document.getElementById("subTitle").textContent="No matching leads found yet.";
+      document.getElementById("emptyState").style.display="block";
+      document.getElementById("emptyTitle").textContent="No leads found";
+      document.getElementById("emptyText").textContent="We couldn't find any buyers matching your products in "+( seller.city||"your area")+". Complete your profile and check back soon.";
+      return;
+    }
+    allLeads=data.leads;
+    buildUI();
+    applyFilter();
+    if(force)toast("Leads refreshed","ok");
+  }catch(err){
+    document.getElementById("loaderBox").style.display="none";
+    document.getElementById("emptyState").style.display="block";
+    document.getElementById("subTitle").textContent="Error loading leads.";
+    document.getElementById("emptyTitle").textContent="Could not load leads";
+    document.getElementById("emptyText").textContent=err.message;
+    toast("Failed: "+err.message,"err",5000);
+  }finally{
+    if(btn)btn.disabled=false;
+  }
+}
+
+function buildUI(){
+  const total=allLeads.length;
+  const withPhone=allLeads.filter(l=>l.buyer_phone).length;
+  const withBudget=allLeads.filter(l=>l.budget_max>0).length;
+  const newCount=allLeads.filter(isNew).length;
+
+  document.getElementById("statsStrip").style.display="grid";
+  document.getElementById("toolbar").style.display="flex";
+  animCount(document.getElementById("stTotal"),total);
+  animCount(document.getElementById("stPhone"),withPhone);
+  animCount(document.getElementById("stBudget"),withBudget);
+  animCount(document.getElementById("stNew"),newCount);
+
+  document.getElementById("fc-all").textContent=total;
+  document.getElementById("fc-phone").textContent=withPhone;
+  document.getElementById("fc-budget").textContent=withBudget;
+  document.getElementById("fc-new").textContent=newCount;
+
+  document.getElementById("subTitle").textContent=
+    `${total} buyer${total!==1?"s":""} searching for your products in ${seller.city||"your area"}`;
+}
+
+/* FILTER FROM STAT CARD CLICK */
+function setFilter(f,el){
+  activeFilter=f;
+  // update chips
+  document.querySelectorAll(".fchip").forEach(c=>c.classList.remove("on"));
+  const chip=document.querySelector(`.fchip[data-f="${f}"]`);
+  if(chip)chip.classList.add("on");
+  // update stat card highlight
+  document.querySelectorAll(".stat").forEach(s=>s.classList.remove("active-filter"));
+  if(el&&f!=="all")el.classList.add("active-filter");
+  applyFilter();
+}
+
+/* FILTER CHIPS */
+document.querySelectorAll(".fchip").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    document.querySelectorAll(".fchip").forEach(b=>b.classList.remove("on"));
+    btn.classList.add("on");
+    activeFilter=btn.dataset.f;
+    document.querySelectorAll(".stat").forEach(s=>s.classList.remove("active-filter"));
+    applyFilter();
+  });
+});
+
+/* SEARCH */
+document.getElementById("searchBox").addEventListener("input",e=>{
+  activeSearch=e.target.value.toLowerCase().trim();
+  applyFilter();
+});
+
+/* SORT */
+document.getElementById("sortSelect").addEventListener("change",applyFilter);
+
+function applyFilter(){
+  const q=activeSearch;
+  let leads=[...allLeads];
+  if(activeFilter==="phone")  leads=leads.filter(l=>l.buyer_phone);
+  if(activeFilter==="budget") leads=leads.filter(l=>l.budget_max>0);
+  if(activeFilter==="new")    leads=leads.filter(isNew);
+  if(q) leads=leads.filter(l=>((l.product||"")+(l.city||"")+(l.buyer_name||"")).toLowerCase().includes(q));
+
+  const sort=document.getElementById("sortSelect").value;
+  if(sort==="budget") leads.sort((a,b)=>(b.budget_max||0)-(a.budget_max||0));
+  else if(sort==="alpha") leads.sort((a,b)=>(a.product||"").localeCompare(b.product||""));
+  else if(sort==="oldest") leads.sort((a,b)=>new Date(a.created_at||0)-new Date(b.created_at||0));
+  else leads.sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0));
+
+  // results meta
+  document.getElementById("resultsMeta").style.display="flex";
+  document.getElementById("resultsCount").textContent=leads.length;
+  const hasFilters=activeFilter!=="all"||q;
+  document.getElementById("clearFilters").style.display=hasFilters?"inline":"none";
+
+  renderLeads(leads,q);
+}
+
+function clearAll(){
+  activeFilter="all";activeSearch="";
+  document.getElementById("searchBox").value="";
+  document.querySelectorAll(".fchip").forEach(c=>c.classList.remove("on"));
+  document.querySelector('.fchip[data-f="all"]').classList.add("on");
+  document.querySelectorAll(".stat").forEach(s=>s.classList.remove("active-filter"));
+  applyFilter();
+}
+
+/* RENDER */
+function renderLeads(leads,q){
+  if(!leads.length){
+    document.getElementById("leadGrid").style.display="none";
+    document.getElementById("emptyState").style.display="block";
+    document.getElementById("emptyTitle").textContent="No results";
+    document.getElementById("emptyText").textContent="No leads match your current filters. Try adjusting your search or filters.";
+    return;
+  }
+  document.getElementById("emptyState").style.display="none";
+  document.getElementById("leadGrid").style.display="grid";
+
+  document.getElementById("leadGrid").innerHTML=leads.map((l,i)=>{
+    const fresh=isNew(l);
+    const budget=l.budget_max>0
+      ?`₹${Number(l.budget_min||0).toLocaleString("en-IN")}–₹${Number(l.budget_max).toLocaleString("en-IN")}`
+      :null;
+    const date=l.created_at
+      ?new Date(l.created_at).toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"})
+      :null;
+    const waMsg=encodeURIComponent(`Hi, I saw your requirement for ${l.product}. I supply this in ${seller.city}. Can we connect?`);
+    const phone=(l.buyer_phone||"").replace(/\D/g,"").slice(-10);
+    const prodDisplay=q?highlight(l.product||"Product",q):esc(l.product||"Product");
+    const delay=Math.min(i*0.04,0.3);
+
+    return `<div class="lc${fresh?" is-new":""}" style="animation-delay:${delay}s">
+      <div class="lc-inner">
+        <div class="lc-head">
+          <div class="lc-title">${prodDisplay}</div>
+          <span class="badge ${fresh?"badge-new":"badge-active"}">${fresh?"New":"Active"}</span>
+        </div>
+        <div class="lc-rows">
+          ${(l.city||l.state)?`<div class="lrow">
+            <div class="lrow-icon">${icon("pin")}</div>
+            <span class="lrow-val">${esc([l.city,l.state].filter(Boolean).join(", "))}</span>
+          </div>`:""}
+          <div class="lrow">
+            <div class="lrow-icon">${icon("money")}</div>
+            <span class="lrow-val ${budget?"strong":"muted"}">${budget||"No budget specified"}</span>
+          </div>
+          ${l.quantity?`<div class="lrow">
+            <div class="lrow-icon">${icon("box")}</div>
+            <span class="lrow-val">${esc(l.quantity)} ${esc(l.unit||"units")}</span>
+          </div>`:""}
+          ${l.buyer_name?`<div class="lrow">
+            <div class="lrow-icon">${icon("user")}</div>
+            <span class="lrow-val">${q?highlight(l.buyer_name,q):esc(l.buyer_name)}</span>
+          </div>`:""}
+          ${l.buyer_phone?`<div class="lrow">
+            <div class="lrow-icon">${icon("phone")}</div>
+            <span class="lrow-val contact">${esc(l.buyer_phone)}</span>
+          </div>`:""}
+          ${date?`<div class="lrow">
+            <div class="lrow-icon">${icon("clock")}</div>
+            <span class="lrow-val muted">${esc(date)}</span>
+          </div>`:""}
+        </div>
+      </div>
+      ${l.buyer_phone?`
+      <button class="lc-expand" id="exp-${i}" onclick="toggleContact(${i},'${esc(l.buyer_phone)}','${waMsg}')">
+        Contact buyer ${icon("chevron")}
+      </button>
+      <div class="lc-contact" id="cnt-${i}">
+        <div class="contact-actions">
+          <a href="tel:${esc(l.buyer_phone)}" class="contact-btn call">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.13.96.37 1.9.7 2.8a2 2 0 0 1-.45 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.44c.9.33 1.84.57 2.8.7A2 2 0 0 1 22 16.9z"/></svg>
+            Call
+          </a>
+          <a href="https://wa.me/91${phone}?text=${waMsg}" target="_blank" rel="noopener" class="contact-btn wa">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8A8.5 8.5 0 0 1 3.5 8.6 8.38 8.38 0 0 1 5.5 4"/><path d="M21 3L3 21"/><circle cx="12" cy="12" r="10"/></svg>
+            WhatsApp
+          </a>
+          <button class="contact-btn copy" id="cp-${i}" onclick="copyPhone('${esc(l.buyer_phone)}',${i})">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copy
+          </button>
+        </div>
+      </div>`:`<div class="lc-contact" style="display:block">
+        <div class="no-contact">No contact info provided by buyer</div>
+      </div>`}
+    </div>`;
+  }).join("");
+}
+
+/* TOGGLE CONTACT */
+function toggleContact(i,phone,waMsg){
+  const cnt=document.getElementById(`cnt-${i}`);
+  const btn=document.getElementById(`exp-${i}`);
+  const isOpen=cnt.classList.contains("visible");
+  // close all others
+  document.querySelectorAll(".lc-contact").forEach(c=>c.classList.remove("visible"));
+  document.querySelectorAll(".lc-expand").forEach(b=>b.classList.remove("open"));
+  if(!isOpen){cnt.classList.add("visible");btn.classList.add("open")}
+}
+
+/* COPY PHONE */
+function copyPhone(phone,i){
+  navigator.clipboard?.writeText(phone).then(()=>{
+    const btn=document.getElementById(`cp-${i}`);
+    if(!btn)return;
+    const orig=btn.innerHTML;
+    btn.classList.add("copied");
+    btn.innerHTML=`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Copied`;
+    setTimeout(()=>{btn.classList.remove("copied");btn.innerHTML=orig},2000);
+    toast("Phone number copied","ok");
+  }).catch(()=>toast("Copy not supported","err"));
+}
+
+loadLeads();
+</script>
+</body>
+</html>

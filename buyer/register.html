@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Find Local Sellers — BizBoost</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #000;
+      --surface: #111;
+      --surface2: #1c1c1e;
+      --border: rgba(255,255,255,0.1);
+      --text: #f5f5f7;
+      --muted: rgba(245,245,247,0.5);
+      --muted2: rgba(245,245,247,0.3);
+      --blue: #2997ff;
+      --blue-d: #147ce5;
+      --green: #30d158;
+      --red: #ff453a;
+      --nav-h: 52px;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', 'Helvetica Neue', sans-serif;
+      background: var(--bg); color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+      height: var(--nav-h);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 24px;
+      background: rgba(0,0,0,0.82);
+      backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .logo { font-size: 18px; font-weight: 700; color: var(--text); text-decoration: none; letter-spacing: -0.03em; }
+    .logo em { color: var(--blue); font-style: normal; }
+    nav ul { list-style: none; display: flex; gap: 12px; }
+    nav ul a {
+      font-size: 13px; color: var(--muted); text-decoration: none;
+      padding: 6px 16px; border-radius: 980px;
+      border: 1px solid var(--border);
+      transition: all 0.18s;
+    }
+    nav ul a:hover { color: var(--text); background: rgba(255,255,255,0.07); }
+
+    /* PAGE */
+    .page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: calc(var(--nav-h) + 40px) 20px 60px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Background glow */
+    .page::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 70% 50% at 50% -10%, rgba(41,151,255,0.18), transparent 60%),
+        radial-gradient(ellipse 50% 40% at 85% 90%, rgba(48,209,88,0.07), transparent 50%);
+      pointer-events: none;
+    }
+    .page-grid {
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+      background-size: 64px 64px;
+      mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black, transparent);
+      pointer-events: none;
+    }
+
+    /* BOX */
+    .box {
+      position: relative; z-index: 2;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 24px;
+      padding: 40px;
+      width: 100%; max-width: 500px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 40px 80px rgba(0,0,0,0.6);
+      animation: rise 0.6s cubic-bezier(0.22,1,0.36,1) both;
+    }
+    @keyframes rise { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
+
+    .box-logo { font-size: 22px; font-weight: 700; margin-bottom: 4px; letter-spacing: -0.03em; }
+    .box-logo em { color: var(--blue); font-style: normal; }
+    .box-sub { font-size: 14px; color: var(--muted); margin-bottom: 22px; line-height: 1.5; }
+
+    /* INFO STRIP */
+    .info-strip {
+      background: rgba(41,151,255,0.1);
+      border: 1px solid rgba(41,151,255,0.2);
+      border-radius: 12px;
+      padding: 13px 16px;
+      font-size: 13px;
+      color: rgba(41,151,255,0.9);
+      line-height: 1.55;
+      margin-bottom: 22px;
+      display: flex; gap: 10px; align-items: flex-start;
+    }
+    .info-strip-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+    /* TABS */
+    .tabs {
+      display: flex;
+      background: rgba(255,255,255,0.06);
+      border-radius: 12px; padding: 3px; margin-bottom: 26px;
+    }
+    .tab {
+      flex: 1; text-align: center; padding: 8px 12px;
+      border: none; background: none; border-radius: 9px;
+      font-size: 14px; font-weight: 500; color: var(--muted);
+      cursor: pointer; transition: all 0.2s; font-family: inherit;
+    }
+    .tab.on { background: var(--surface2); color: var(--text); box-shadow: 0 1px 6px rgba(0,0,0,0.4); }
+
+    /* FORM */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .fg { margin-bottom: 14px; }
+    .fg label {
+      display: block; font-size: 12px; font-weight: 500;
+      color: var(--muted); margin-bottom: 6px; letter-spacing: 0.02em;
+    }
+    .fg input, .fg textarea, .fg select {
+      width: 100%; padding: 11px 14px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      color: var(--text); font-size: 14px;
+      outline: none; transition: all 0.2s;
+      font-family: inherit;
+    }
+    .fg input::placeholder, .fg textarea::placeholder { color: var(--muted2); }
+    .fg textarea { resize: vertical; min-height: 80px; }
+    .fg input:focus, .fg textarea:focus, .fg select:focus {
+      border-color: rgba(41,151,255,0.5);
+      box-shadow: 0 0 0 3px rgba(41,151,255,0.1);
+      background: rgba(255,255,255,0.1);
+    }
+    .fg input:focus::placeholder { color: transparent; }
+    .fg select option { background: #1c1c1e; }
+
+    /* Password strength */
+    .pwd-strength { display: flex; gap: 4px; margin-top: 6px; }
+    .pwd-bar { flex: 1; height: 2px; border-radius: 2px; background: rgba(255,255,255,0.1); transition: background 0.3s; }
+    .pwd-bar.weak { background: var(--red); }
+    .pwd-bar.med  { background: var(--blue); }
+    .pwd-bar.str  { background: var(--green); }
+    .pwd-hint { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+    /* Error */
+    .err-msg { color: var(--red); font-size: 12px; margin-top: 10px; display: none; padding: 10px 14px; background: rgba(255,69,58,0.08); border: 1px solid rgba(255,69,58,0.2); border-radius: 8px; }
+    .err-msg.show { display: block; }
+
+    /* Button */
+    .btn-main {
+      width: 100%; padding: 13px; border-radius: 10px;
+      background: var(--blue); color: #fff; border: none;
+      font-size: 15px; font-weight: 600; cursor: pointer;
+      transition: all 0.2s; margin-top: 10px; font-family: inherit;
+      position: relative; overflow: hidden;
+    }
+    .btn-main::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(90deg, transparent 30%, rgba(255,255,255,0.15) 50%, transparent 70%);
+      transform: translateX(-100%); transition: transform 0.5s;
+    }
+    .btn-main:hover::before { transform: translateX(100%); }
+    .btn-main:hover { background: var(--blue-d); }
+    .btn-main:active { transform: scale(0.98); }
+    .btn-main:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(10px);
+      background: rgba(30,30,32,0.95);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: var(--text); font-size: 14px; font-weight: 500;
+      padding: 12px 24px; border-radius: 980px;
+      opacity: 0; pointer-events: none;
+      transition: all 0.3s; z-index: 999;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* Step indicator */
+    .steps-ind {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 24px;
+    }
+    .step-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: rgba(255,255,255,0.15); transition: all 0.3s;
+    }
+    .step-dot.on { background: var(--blue); width: 20px; border-radius: 3px; }
+    .step-label { font-size: 12px; color: var(--muted); margin-left: 4px; }
+
+    /* Divider */
+    .switch-link { text-align: center; font-size: 13px; color: var(--muted); margin-top: 18px; }
+    .switch-link a { color: var(--blue); cursor: pointer; text-decoration: none; }
+
+    @media (max-width: 540px) {
+      .box { padding: 28px 20px; }
+      .two-col { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="../index.html" class="logo">Biz<em>Boost</em></a>
+  <ul><li><a href="../seller/register.html">I'm a Seller →</a></li></ul>
+</nav>
+
+<div class="page">
+  <div class="page-grid"></div>
+
+  <div class="box">
+    <div class="box-logo">Find Local <em>Sellers</em></div>
+    <p class="box-sub">Register once, get matched with verified local businesses instantly.</p>
+
+    <div class="info-strip">
+      <span class="info-strip-icon">🔍</span>
+      <span>We search our verified seller database, then automatically check Google Maps, JustDial, IndiaMart & TradeIndia if needed.</span>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab on" id="tabReg" onclick="switchTab('register')">New User</button>
+      <button class="tab" id="tabLog" onclick="switchTab('login')">Sign In</button>
+    </div>
+
+    <!-- Register Form -->
+    <form id="registerForm" onsubmit="handleRegister(event)" autocomplete="off">
+      <div class="two-col">
+        <div class="fg">
+          <label>Your Name *</label>
+          <input type="text" id="r_name" placeholder="Full name" required>
+        </div>
+        <div class="fg">
+          <label>Phone *</label>
+          <input type="tel" id="r_contact" placeholder="9876543210" required>
+        </div>
+      </div>
+      <div class="fg">
+        <label>Email *</label>
+        <input type="email" id="r_email" placeholder="you@email.com" required>
+      </div>
+      <div class="two-col">
+        <div class="fg">
+          <label>City *</label>
+          <input type="text" id="r_city" placeholder="e.g. Vadodara" required>
+        </div>
+        <div class="fg">
+          <label>State *</label>
+          <input type="text" id="r_state" placeholder="e.g. Gujarat" required>
+        </div>
+      </div>
+      <div class="fg">
+        <label>What are you looking for? *</label>
+        <textarea id="r_requirement" placeholder="e.g. I need wholesale electronics supplier for mobile accessories" required></textarea>
+      </div>
+      <div class="two-col">
+        <div class="fg">
+          <label>Budget Min (₹)</label>
+          <input type="number" id="r_budget_min" placeholder="5,000">
+        </div>
+        <div class="fg">
+          <label>Budget Max (₹)</label>
+          <input type="number" id="r_budget_max" placeholder="50,000">
+        </div>
+      </div>
+      <div class="fg">
+        <label>Password *</label>
+        <input type="password" id="r_password" placeholder="Min 8 characters" required minlength="8" oninput="checkPwd(this.value)">
+        <div class="pwd-strength">
+          <div class="pwd-bar" id="pb1"></div>
+          <div class="pwd-bar" id="pb2"></div>
+          <div class="pwd-bar" id="pb3"></div>
+          <div class="pwd-bar" id="pb4"></div>
+        </div>
+        <div class="pwd-hint" id="pwdHint">Enter a password</div>
+      </div>
+      <div class="err-msg" id="registerError"></div>
+      <button type="submit" class="btn-main" id="registerBtn">Find Sellers Near Me →</button>
+      <div class="switch-link">Already have an account? <a onclick="switchTab('login')">Sign in →</a></div>
+    </form>
+
+    <!-- Login Form -->
+    <form id="loginForm" onsubmit="handleLogin(event)" style="display:none">
+      <div class="fg">
+        <label>Email</label>
+        <input type="email" id="l_email" placeholder="you@email.com" required autocomplete="email">
+      </div>
+      <div class="fg">
+        <label>Password</label>
+        <input type="password" id="l_password" placeholder="Your password" required autocomplete="current-password">
+      </div>
+      <div class="err-msg" id="loginError"></div>
+      <button type="submit" class="btn-main" id="loginBtn">Sign In →</button>
+      <div class="switch-link">Don't have an account? <a onclick="switchTab('register')">Register →</a></div>
+    </form>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = "../api";
+
+function switchTab(tab) {
+  document.getElementById('tabReg').classList.toggle('on', tab === 'register');
+  document.getElementById('tabLog').classList.toggle('on', tab === 'login');
+  document.getElementById('registerForm').style.display = tab === 'register' ? 'block' : 'none';
+  document.getElementById('loginForm').style.display    = tab === 'login'    ? 'block' : 'none';
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+function showErr(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg; el.classList.add('show');
+}
+function clearErr(id) {
+  document.getElementById(id).classList.remove('show');
+}
+
+// Password strength checker
+function checkPwd(val) {
+  const bars = ['pb1','pb2','pb3','pb4'];
+  const hint = document.getElementById('pwdHint');
+  let score = 0;
+  if (val.length >= 8) score++;
+  if (/[A-Z]/.test(val)) score++;
+  if (/[0-9]/.test(val)) score++;
+  if (/[^A-Za-z0-9]/.test(val)) score++;
+
+  bars.forEach((id, i) => {
+    const el = document.getElementById(id);
+    el.className = 'pwd-bar';
+    if (i < score) {
+      if (score <= 1) el.classList.add('weak');
+      else if (score <= 2) el.classList.add('med');
+      else el.classList.add('str');
+    }
+  });
+
+  const labels = ['', 'Weak', 'Fair', 'Good', 'Strong'];
+  hint.textContent = val ? labels[score] || 'Weak' : 'Enter a password';
+  hint.style.color = score <= 1 ? '#ff453a' : score <= 2 ? '#2997ff' : '#30d158';
+}
+
+// Input focus animation
+document.querySelectorAll('input, textarea').forEach(inp => {
+  inp.parentElement?.classList && inp.addEventListener('focus', () => {
+    inp.style.transform = 'scale(1.005)';
+  });
+  inp.addEventListener('blur', () => {
+    inp.style.transform = '';
+  });
+});
+
+async function handleRegister(e) {
+  e.preventDefault();
+  clearErr('registerError');
+  const btn = document.getElementById('registerBtn');
+  btn.disabled = true; btn.textContent = 'Setting up your account…';
+
+  const payload = {
+    name:       document.getElementById('r_name').value.trim(),
+    contact:    document.getElementById('r_contact').value.trim(),
+    email:      document.getElementById('r_email').value.trim(),
+    city:       document.getElementById('r_city').value.trim(),
+    state:      document.getElementById('r_state').value.trim(),
+    requirement:document.getElementById('r_requirement').value.trim(),
+    budget_min: document.getElementById('r_budget_min').value || 0,
+    budget_max: document.getElementById('r_budget_max').value || 0,
+    password:   document.getElementById('r_password').value,
+  };
+
+  try {
+    const res  = await fetch(`${API}/buyer_register.php`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || 'Registration failed');
+    localStorage.setItem('buyer', JSON.stringify({ ...payload, id: data.buyer_id }));
+    toast('✅ Account created! Finding sellers…');
+    setTimeout(() => location.href = 'search.html', 1200);
+  } catch (err) {
+    showErr('registerError', '❌ ' + err.message);
+    btn.disabled = false; btn.textContent = 'Find Sellers Near Me →';
+  }
+}
+
+async function handleLogin(e) {
+  e.preventDefault();
+  clearErr('loginError');
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true; btn.textContent = 'Signing in…';
+
+  try {
+    const res  = await fetch(`${API}/buyer_login.php`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email:    document.getElementById('l_email').value.trim(),
+        password: document.getElementById('l_password').value,
+      })
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || 'Invalid credentials');
+    localStorage.setItem('buyer', JSON.stringify(data.buyer));
+    toast('✅ Welcome back!');
+    setTimeout(() => location.href = 'search.html', 1200);
+  } catch (err) {
+    showErr('loginError', '❌ ' + err.message);
+    btn.disabled = false; btn.textContent = 'Sign In →';
+  }
+}
+
+if (localStorage.getItem('buyer')) location.href = 'search.html';
+</script>
+</body>
+</html>

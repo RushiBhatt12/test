@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Competitors — BizBoost</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #000; --s1: #0a0a0b; --s2: #111113; --s3: #1a1a1c; --s4: #242426;
+      --border: rgba(255,255,255,0.07); --border2: rgba(255,255,255,0.04); --border3: rgba(255,255,255,0.12);
+      --text: #f5f5f7; --text2: rgba(245,245,247,0.88);
+      --muted: rgba(245,245,247,0.48); --muted2: rgba(245,245,247,0.24);
+      --blue: #2997ff; --blue-d: #0a84ff;
+      --green: #124669; --orange: #ff9f0a; --red: #ff453a; --purple: #bf5af2;
+      --nav-h: 52px; --r: 18px; --r-sm: 12px;
+    }
+
+    html { scroll-behavior: smooth; }
+    body { font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif; background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+
+    /* PROGRESS */
+    #prog { position: fixed; top: 0; left: 0; height: 2px; width: 0%; background: linear-gradient(90deg, var(--blue), var(--purple)); z-index: 9999; transition: width 0.1s; box-shadow: 0 0 8px rgba(41,151,255,0.4); }
+
+    /* NAV */
+    .nav { position: sticky; top: 0; z-index: 200; height: var(--nav-h); display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 28px; background: rgba(0,0,0,0.78); backdrop-filter: saturate(200%) blur(24px); -webkit-backdrop-filter: saturate(200%) blur(24px); border-bottom: 1px solid var(--border); }
+    .logo { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 700; color: var(--text); text-decoration: none; letter-spacing: -0.03em; flex-shrink: 0; }
+    .logo em { color: var(--blue); font-style: normal; }
+    .nav-tabs { display: flex; gap: 2px; }
+    .ntab { font-size: 13px; font-weight: 500; padding: 6px 13px; border-radius: 9px; text-decoration: none; color: var(--muted); transition: color 0.15s, background 0.15s; letter-spacing: -0.01em; white-space: nowrap; }
+    .ntab:hover { color: var(--text); background: rgba(255,255,255,0.06); }
+    .ntab.on { color: var(--blue); background: rgba(41,151,255,0.1); }
+    .nav-r { display: flex; gap: 8px; align-items: center; }
+    .nbtn { font-size: 13px; font-weight: 500; padding: 6px 16px; border-radius: 980px; border: 1px solid var(--border3); background: rgba(255,255,255,0.05); color: var(--text); cursor: pointer; text-decoration: none; transition: background 0.18s, transform 0.15s, box-shadow 0.18s; font-family: inherit; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; }
+    .nbtn svg { width: 12px; height: 12px; }
+    .nbtn:hover { background: rgba(255,255,255,0.1); transform: translateY(-1px); }
+    .nbtn:active { transform: translateY(0); }
+    .nbtn.blue { background: var(--blue); color: #fff; border-color: var(--blue); }
+    .nbtn.blue:hover { background: var(--blue-d); box-shadow: 0 4px 20px rgba(41,151,255,0.4); }
+
+    /* BURGER */
+    .nav-burger { display: none; flex-direction: column; gap: 5px; cursor: pointer; background: none; border: none; padding: 6px; }
+    .nav-burger span { width: 20px; height: 1.5px; background: var(--text); display: block; transition: all 0.3s; border-radius: 2px; }
+    .nav-burger.open span:nth-child(1) { transform: rotate(45deg) translate(4.5px, 4.5px); }
+    .nav-burger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+    .nav-burger.open span:nth-child(3) { transform: rotate(-45deg) translate(4.5px, -4.5px); }
+    .nav-mobile { position: fixed; top: var(--nav-h); left: 0; right: 0; z-index: 199; background: rgba(0,0,0,0.92); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); border-bottom: 1px solid var(--border); padding: 14px 20px 18px; display: flex; flex-direction: column; gap: 3px; transform: translateY(-110%); transition: transform 0.3s cubic-bezier(0.25,0.46,0.45,0.94); }
+    .nav-mobile.open { transform: translateY(0); }
+    .nav-mobile .ntab { font-size: 15px; padding: 11px 14px; border-radius: 12px; }
+
+    /* MAIN */
+    .main { max-width: 1000px; margin: 0 auto; padding: 36px 24px 100px; }
+
+    /* PAGE HEADER */
+    .ph { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 28px; }
+    .ph-l {}
+    .ph-l h1 { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 700; letter-spacing: -0.04em; margin-bottom: 4px; display: flex; align-items: center; gap: 10px; }
+    .ph-icon { width: 32px; height: 32px; border-radius: 9px; background: rgba(41,151,255,0.12); border: 1px solid rgba(41,151,255,0.2); display: inline-flex; align-items: center; justify-content: center; color: var(--blue); flex-shrink: 0; }
+    .ph-icon svg { width: 16px; height: 16px; }
+    .ph-l p { color: var(--muted); font-size: 13.5px; }
+    .ph-r { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    /* STATS BAR */
+    .stats { display: flex; gap: 12px; margin-bottom: 28px; flex-wrap: wrap; }
+    .stat { background: var(--s2); border: 1px solid var(--border); border-radius: 14px; padding: 14px 20px; transition: border-color 0.2s, transform 0.2s; cursor: default; }
+    .stat:hover { border-color: rgba(255,255,255,0.13); transform: translateY(-2px); }
+    .sn { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700; letter-spacing: -0.04em; }
+    .sl { font-size: 11.5px; color: var(--muted); font-weight: 500; margin-top: 3px; }
+
+    /* TOP COMPETITOR BANNER */
+    .tc-banner { background: var(--s2); border: 1px solid rgba(255,69,58,0.18); border-radius: 20px; padding: 28px; margin-bottom: 24px; position: relative; overflow: hidden; animation: rise 0.5s cubic-bezier(0.22,1,0.36,1) both; }
+    .tc-banner::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at top left, rgba(255,69,58,0.07), transparent 60%); pointer-events: none; }
+    .tc-banner > * { position: relative; z-index: 1; }
+    @keyframes rise { from { opacity:0; transform: translateY(20px); } to { opacity:1; transform: translateY(0); } }
+
+    .tc-badge { display: inline-flex; align-items: center; gap: 7px; background: rgba(255,69,58,0.1); border: 1px solid rgba(255,69,58,0.22); color: var(--red); padding: 5px 13px; border-radius: 980px; font-size: 12px; font-weight: 600; margin-bottom: 14px; }
+    .tc-badge svg { width: 12px; height: 12px; }
+    .tc-name { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 6px; }
+    .tc-why { font-size: 13.5px; color: var(--muted); line-height: 1.65; margin-bottom: 20px; }
+    .tc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .tc-box { background: rgba(255,255,255,0.04); border: 1px solid var(--border2); border-radius: 13px; padding: 16px 18px; }
+    .tc-box h4 { font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted2); margin-bottom: 12px; }
+    .tc-box ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .tc-box ul li { font-size: 13px; color: var(--text2); display: flex; gap: 9px; align-items: flex-start; line-height: 1.5; }
+    .tc-box ul li svg { width: 13px; height: 13px; flex-shrink: 0; margin-top: 2px; }
+    .str-icon { color: var(--orange); }
+    .beat-icon { color: var(--green); }
+
+    /* FILTER BAR */
+    .fbar { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+    .fsearch-wrap { position: relative; flex: 1; min-width: 200px; max-width: 280px; }
+    .fsearch-wrap svg { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; color: var(--muted); pointer-events: none; }
+    .fsearch { width: 100%; padding: 8px 16px 8px 36px; border: 1px solid var(--border); border-radius: 980px; font-size: 13.5px; background: var(--s2); outline: none; color: var(--text); font-family: inherit; transition: border-color 0.18s, box-shadow 0.18s; }
+    .fsearch::placeholder { color: var(--muted2); }
+    .fsearch:focus { border-color: rgba(41,151,255,0.4); box-shadow: 0 0 0 3px rgba(41,151,255,0.08); }
+    .filter-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+    .fchip { font-size: 12.5px; font-weight: 500; padding: 6px 15px; border-radius: 980px; border: 1px solid var(--border); background: var(--s2); color: var(--muted); cursor: pointer; transition: all 0.18s; user-select: none; display: inline-flex; align-items: center; gap: 5px; }
+    .fchip svg { width: 11px; height: 11px; }
+    .fchip:hover { border-color: rgba(41,151,255,0.35); color: var(--blue); }
+    .fchip.on { background: var(--blue); color: #fff; border-color: var(--blue); }
+
+    /* COUNT LABEL */
+    .results-count { font-size: 12px; color: var(--muted); margin-bottom: 14px; padding-left: 2px; }
+
+    /* COMP GRID */
+    .comp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 14px; }
+
+    /* COMP CARD */
+    .cc { background: var(--s2); border: 1px solid var(--border); border-radius: var(--r); padding: 20px; transition: transform 0.25s cubic-bezier(0.25,0.46,0.45,0.94), box-shadow 0.25s, border-color 0.2s; position: relative; overflow: hidden; animation: cardIn 0.4s cubic-bezier(0.22,1,0.36,1) both; }
+    .cc::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.07), transparent); }
+    @keyframes cardIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    .cc:hover { transform: translateY(-4px); box-shadow: 0 20px 56px rgba(0,0,0,0.5); border-color: rgba(255,255,255,0.13); }
+    .cc.top { border-color: rgba(255,69,58,0.22); border-left: 2px solid var(--red); }
+    .cc.top:hover { border-color: rgba(255,69,58,0.35); }
+
+    /* RANK BADGE */
+    .cc-rank { position: absolute; top: 16px; right: 16px; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10.5px; font-weight: 700; }
+    .rk1 { background: linear-gradient(135deg, #ffd700, #f5a623); color: #5c3d00; }
+    .rk2 { background: linear-gradient(135deg, #d0d0d8, #a8a8b0); color: #2c2c2e; }
+    .rk3 { background: linear-gradient(135deg, #cd7f32, #b06020); color: #fff; }
+    .rkx { background: rgba(255,255,255,0.07); color: var(--muted); border: 1px solid var(--border); }
+
+    .cc-name { font-size: 15px; font-weight: 700; margin-bottom: 4px; padding-right: 38px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -0.01em; }
+    .cc-addr { font-size: 12.5px; color: var(--muted); margin-bottom: 14px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.55; display: flex; align-items: flex-start; gap: 6px; }
+    .cc-addr svg { width: 12px; height: 12px; flex-shrink: 0; margin-top: 2px; color: var(--muted2); }
+
+    .cc-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+    .badge { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 980px; display: inline-flex; align-items: center; gap: 5px; }
+    .badge svg { width: 10px; height: 10px; }
+    .b-maps { background: rgba(250, 250, 249, 0.918); color: var(--green); border: 1px solid rgba(30, 134, 182, 0.15); }
+    .b-web  { background: rgba(41,151,255,0.1); color: var(--blue);  border: 1px solid rgba(41,151,255,0.15); }
+    .b-top  { background: rgba(255,69,58,0.1);  color: var(--red);   border: 1px solid rgba(255,69,58,0.18); }
+    .b-star { background: rgba(255,159,10,0.1); color: var(--orange);border: 1px solid rgba(255,159,10,0.18); }
+    .b-phone{ background: rgba(191,90,242,0.1); color: var(--purple);border: 1px solid rgba(191,90,242,0.15); }
+
+    .cc-actions { display: flex; gap: 7px; flex-wrap: wrap; }
+    .cca { font-size: 12px; font-weight: 500; padding: 7px 14px; border-radius: 980px; text-decoration: none; border: 1px solid var(--border3); color: var(--text); transition: background 0.18s, transform 0.15s, box-shadow 0.18s; background: rgba(255,255,255,0.04); display: inline-flex; align-items: center; gap: 6px; }
+    .cca svg { width: 12px; height: 12px; }
+    .cca:hover { background: rgba(255,255,255,0.1); transform: translateY(-1px); }
+    .cca:active { transform: translateY(0); }
+    .cca.call { background: var(--green); color: #fff; border-color: var(--green); }
+    .cca.call:hover { background: #25a244; box-shadow: 0 6px 20px rgba(48,209,88,0.28); }
+
+    /* EMPTY STATE */
+    .empty { text-align: center; padding: 72px 24px; color: var(--muted); }
+    .empty .ei { width: 60px; height: 60px; margin: 0 auto 18px; background: var(--s2); border: 1px solid var(--border); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: var(--muted2); }
+    .empty .ei svg { width: 26px; height: 26px; }
+    .empty h3 { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 8px; letter-spacing: -0.02em; }
+    .empty p { font-size: 14px; line-height: 1.6; max-width: 340px; margin: 0 auto; }
+
+    /* TOAST */
+    .toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(16px); background: rgba(18,18,20,0.96); border: 1px solid rgba(255,255,255,0.1); color: var(--text); font-size: 13.5px; font-weight: 500; padding: 11px 20px; border-radius: 980px; opacity: 0; pointer-events: none; transition: opacity 0.3s, transform 0.35s cubic-bezier(0.34,1.56,0.64,1); z-index: 999; backdrop-filter: blur(16px); box-shadow: 0 8px 36px rgba(0,0,0,0.6); display: flex; align-items: center; gap: 9px; white-space: nowrap; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast svg { width: 15px; height: 15px; flex-shrink: 0; color: var(--blue); }
+
+    /* SCROLLBAR */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.18); }
+
+    /* RESPONSIVE */
+    @media (max-width: 700px) {
+      .comp-grid { grid-template-columns: 1fr; }
+      .tc-grid { grid-template-columns: 1fr; }
+      .nav-tabs { display: none; }
+      .nav-burger { display: flex; }
+      .ph { flex-direction: column; gap: 12px; }
+    }
+    @media (max-width: 480px) {
+      .main { padding: 24px 16px 80px; }
+      .ph-l h1 { font-size: 22px; }
+      .stats { gap: 8px; }
+      .stat { padding: 12px 16px; }
+      .sn { font-size: 18px; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="prog"></div>
+
+<!-- NAV -->
+<nav class="nav" id="mainNav">
+  <a href="../index.html" class="logo">Biz<em>Boost</em></a>
+  <div class="nav-tabs">
+    <a href="dashboard.html" class="ntab">Dashboard</a>
+    <a href="competitors.html" class="ntab on">Competitors</a>
+    <a href="keywords.html" class="ntab">Keywords &amp; SEO</a>
+    <a href="leads.html" class="ntab">Buyer Leads</a>
+  </div>
+  <div class="nav-r">
+    <a href="onboard.html" class="nbtn">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      Edit Profile
+    </a>
+    <button class="nbtn blue" onclick="rerun()">
+      <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3"/></svg>
+      Re-analyse
+    </button>
+    <button class="nav-burger" id="burgerBtn" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<div class="nav-mobile" id="mobileMenu">
+  <a href="dashboard.html" class="ntab">Dashboard</a>
+  <a href="competitors.html" class="ntab on">Competitors</a>
+  <a href="keywords.html" class="ntab">Keywords &amp; SEO</a>
+  <a href="leads.html" class="ntab">Buyer Leads</a>
+</div>
+
+<div class="main">
+
+  <!-- PAGE HEADER -->
+  <div class="ph">
+    <div class="ph-l">
+      <h1>
+        <span class="ph-icon">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
+        </span>
+        Local Competitors
+      </h1>
+      <p id="subTitle">Loading competitor data...</p>
+    </div>
+    <div class="ph-r">
+      <button class="nbtn blue" onclick="rerun()">
+        <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3"/></svg>
+        Re-analyse
+      </button>
+    </div>
+  </div>
+
+  <!-- STATS BAR -->
+  <div id="statsBar" class="stats" style="display:none">
+    <div class="stat">
+      <div class="sn" id="stTotal">0</div>
+      <div class="sl">Total Found</div>
+    </div>
+    <div class="stat">
+      <div class="sn" id="stPhone" style="color:var(--green)">0</div>
+      <div class="sl">With Phone</div>
+    </div>
+    <div class="stat">
+      <div class="sn" id="stWeb" style="color:var(--blue)">0</div>
+      <div class="sl">With Website</div>
+    </div>
+    <div class="stat">
+      <div class="sn" id="stMaps" style="color:var(--orange)">0</div>
+      <div class="sl">On Google Maps</div>
+    </div>
+    <div class="stat">
+      <div class="sn" id="stSkipped" style="color:var(--muted)">0</div>
+      <div class="sl">Chains Excluded</div>
+    </div>
+  </div>
+
+  <!-- TOP COMPETITOR BANNER -->
+  <div id="tcBanner"></div>
+
+  <!-- FILTER BAR -->
+  <div class="fbar" id="fbar" style="display:none">
+    <div class="fsearch-wrap">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" class="fsearch" id="searchBox" placeholder="Search competitors...">
+    </div>
+    <div class="filter-chips">
+      <button class="fchip on" data-f="all">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        All
+      </button>
+      <button class="fchip" data-f="maps">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        Maps
+      </button>
+      <button class="fchip" data-f="search">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        Web
+      </button>
+      <button class="fchip" data-f="phone">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6 6l1.27-.85a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        Has Phone
+      </button>
+      <button class="fchip" data-f="rated">
+        <svg fill="var(currentColor)" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        Rated
+      </button>
+    </div>
+  </div>
+
+  <div id="resultsCount" class="results-count" style="display:none"></div>
+  <div id="compGrid" class="comp-grid"></div>
+
+  <!-- EMPTY STATE -->
+  <div id="emptyState" class="empty" style="display:none">
+    <div class="ei">
+      <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </div>
+    <h3>No competitors found yet</h3>
+    <p>Run an analysis from the dashboard to discover real local competitors in your market.</p>
+    <a href="dashboard.html" class="nbtn blue" style="display:inline-flex;margin-top:20px">
+      <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      Go to Dashboard
+    </a>
+  </div>
+
+</div>
+
+<div class="toast" id="toast">
+  <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" id="toastIcon"></svg>
+  <span id="toastMsg"></span>
+</div>
+
+<script>
+const API = "/api";
+const seller = JSON.parse(localStorage.getItem("seller") || "null");
+if (!seller?.id) location.href = "register.html";
+
+/* SCROLL PROGRESS */
+window.addEventListener("scroll", () => {
+  const s = window.scrollY, h = document.documentElement.scrollHeight - innerHeight;
+  if (h > 0) document.getElementById("prog").style.width = (s / h * 100) + "%";
+}, { passive: true });
+
+/* BURGER */
+const burgerBtn = document.getElementById("burgerBtn");
+const mobileMenu = document.getElementById("mobileMenu");
+burgerBtn.addEventListener("click", () => {
+  burgerBtn.classList.toggle("open");
+  mobileMenu.classList.toggle("open");
+});
+document.addEventListener("click", e => {
+  if (!burgerBtn.contains(e.target) && !mobileMenu.contains(e.target)) {
+    burgerBtn.classList.remove("open");
+    mobileMenu.classList.remove("open");
+  }
+});
+
+/* TOAST */
+function toast(msg, type = "info", dur = 3000) {
+  const icons = {
+    success: '<polyline points="20 6 9 17 4 12"/>',
+    error:   '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
+    info:    '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>'
+  };
+  const colors = { success: "var(--green)", error: "var(--red)", info: "var(--blue)" };
+  const t = document.getElementById("toast");
+  document.getElementById("toastIcon").innerHTML = icons[type] || icons.info;
+  document.getElementById("toastIcon").style.color = colors[type] || colors.info;
+  document.getElementById("toastMsg").textContent = msg;
+  t.classList.add("show");
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.remove("show"), dur);
+}
+
+function esc(s) { return (s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+
+/* SVG ICON HELPERS */
+const SVG = {
+  bolt:   `<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`,
+  check:  `<svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>`,
+  phone:  `<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6 6l1.27-.85a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>`,
+  globe:  `<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`,
+  pin:    `<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`,
+  star:   `<svg fill="currentColor" stroke="none" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
+  target: `<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>`,
+  maps:   `<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>`,
+  crown:  `<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 20h20M5 20l-2-9 5 4 4-8 4 8 5-4-2 9"/></svg>`,
+};
+
+let allComps = [], activeFilter = "all";
+const cached = JSON.parse(localStorage.getItem("lastReport") || "null");
+
+if (!cached?.competitors?.length) {
+  document.getElementById("emptyState").style.display = "block";
+  document.getElementById("subTitle").textContent = "No data yet — run analysis first.";
+} else {
+  allComps = cached.competitors;
+  initPage(cached.competitors, cached.top_competitor, cached.strategy);
+}
+
+function initPage(comps, topComp, strategy) {
+  const s = JSON.parse(localStorage.getItem("seller") || "{}");
+  const d = JSON.parse(localStorage.getItem("sellerDetails") || "{}");
+  document.getElementById("subTitle").textContent = `${comps.length} local ${(d.products_offered || s.category || "business").split(",")[0].trim()} sellers found in ${s.city || "your city"}`;
+
+  // Stats
+  document.getElementById("statsBar").style.display = "flex";
+  document.getElementById("stTotal").textContent = comps.length;
+  document.getElementById("stPhone").textContent = comps.filter(c => c.phone).length;
+  document.getElementById("stWeb").textContent = comps.filter(c => c.website).length;
+  document.getElementById("stMaps").textContent = comps.filter(c => c.source === "Google Maps").length;
+  document.getElementById("stSkipped").textContent = cached.counts?.chains_skipped || "—";
+
+  // Top competitor banner
+  if (topComp?.name && strategy?.top_competitor) {
+    const tc = strategy.top_competitor;
+    const str = (tc.their_strengths || []).map(s => `
+      <li><span class="str-icon">${SVG.bolt}</span>${esc(s)}</li>`).join("");
+    const how = (tc.how_to_beat_them || []).map(s => `
+      <li><span class="beat-icon">${SVG.check}</span>${esc(s)}</li>`).join("");
+    document.getElementById("tcBanner").innerHTML = `
+      <div class="tc-banner">
+        <div class="tc-badge">${SVG.target} Top Competitor</div>
+        <div class="tc-name">${esc(topComp.name)}</div>
+        <div class="tc-why">${esc(tc.why_winning || "Currently dominating your local market.")}</div>
+        <div class="tc-grid">
+          <div class="tc-box">
+            <h4>Their Strengths</h4>
+            <ul>${str || "<li>—</li>"}</ul>
+          </div>
+          <div class="tc-box">
+            <h4>How to Beat Them</h4>
+            <ul>${how || "<li>—</li>"}</ul>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  document.getElementById("fbar").style.display = "flex";
+  document.getElementById("resultsCount").style.display = "block";
+  renderGrid(comps, topComp);
+}
+
+function renderGrid(comps, topComp) {
+  const topName = topComp?.name || "";
+  const countEl = document.getElementById("resultsCount");
+
+  if (!comps.length) {
+    document.getElementById("compGrid").innerHTML = "";
+    document.getElementById("emptyState").style.display = "block";
+    countEl.style.display = "none";
+    return;
+  }
+  document.getElementById("emptyState").style.display = "none";
+  countEl.textContent = `Showing ${comps.length} competitor${comps.length !== 1 ? "s" : ""}`;
+
+  document.getElementById("compGrid").innerHTML = comps.map((c, i) => {
+    const isTop = c.name === topName;
+    const rkCl = i === 0 ? "rk1" : i === 1 ? "rk2" : i === 2 ? "rk3" : "rkx";
+    const delay = Math.min(i * 0.04, 0.4);
+    const sourceIco = c.source === "Google Maps" ? SVG.maps : SVG.globe;
+    return `
+      <div class="cc ${isTop ? "top" : ""}" style="animation-delay:${delay}s">
+        <div class="cc-rank ${rkCl}">${i + 1}</div>
+        <div class="cc-name" title="${esc(c.name)}">${esc(c.name)}</div>
+        <div class="cc-addr">${c.address ? `${SVG.pin}<span style="-webkit-line-clamp:2;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical">${esc(c.address)}</span>` : ""}</div>
+        <div class="cc-meta">
+          ${isTop ? `<span class="badge b-top">${SVG.crown} Top Rival</span>` : ""}
+          <span class="badge ${c.source === "Google Maps" ? "b-maps" : "b-web"}">${sourceIco} ${esc(c.source)}</span>
+          ${c.rating ? `<span class="badge b-star">${SVG.star} ${c.rating} · ${Number(c.reviews).toLocaleString("en-IN")}</span>` : ""}
+          ${c.phone ? `<span class="badge b-phone">${SVG.phone} Has Phone</span>` : ""}
+        </div>
+        <div class="cc-actions">
+          ${c.phone ? `<a href="tel:${esc(c.phone)}" class="cca call">${SVG.phone} Call</a>` : ""}
+          ${c.website ? `<a href="${esc(c.website)}" target="_blank" rel="noopener" class="cca">${SVG.globe} Website</a>` : ""}
+          ${c.address ? `<a href="https://maps.google.com?q=${encodeURIComponent(c.name + " " + c.address)}" target="_blank" rel="noopener" class="cca">${SVG.pin} Map</a>` : ""}
+        </div>
+      </div>`;
+  }).join("");
+}
+
+/* FILTER CHIPS */
+document.querySelectorAll(".fchip").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".fchip").forEach(b => b.classList.remove("on"));
+    btn.classList.add("on");
+    activeFilter = btn.dataset.f;
+    applyFilter();
+  });
+});
+
+document.getElementById("searchBox").addEventListener("input", applyFilter);
+
+function applyFilter() {
+  const q = document.getElementById("searchBox").value.toLowerCase().trim();
+  let f = allComps;
+  if (activeFilter === "maps")   f = f.filter(c => c.source === "Google Maps");
+  if (activeFilter === "search") f = f.filter(c => c.source === "Google Search");
+  if (activeFilter === "phone")  f = f.filter(c => c.phone);
+  if (activeFilter === "rated")  f = f.filter(c => c.rating);
+  if (q) f = f.filter(c => (c.name + " " + (c.address || "")).toLowerCase().includes(q));
+  renderGrid(f, cached?.top_competitor || null);
+}
+
+async function rerun() {
+  localStorage.removeItem("lastReport");
+  location.href = "dashboard.html?analyse=1";
+}
+</script>
+</body>
+</html>
